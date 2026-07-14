@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("a2ec3ce9-9e8c-413d-a323-844b37c0d9e5")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("MyReadingNookApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1e1ff53a433728322b347aa81562578a826832ed")]
 [assembly: System.Reflection.AssemblyProductAttribute("MyReadingNookApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MyReadingNookApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

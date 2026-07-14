@@ -7,10 +7,10 @@ namespace MyReadingNookApp.Models
         public NookContext(DbContextOptions<NookContext> options)
             : base(options) { }
 
-        public DbSet<User> Users { get; set; } = null!;
+        public DbSet<UserModel> Users { get; set; } = null!;
 
-        public DbSet<Book> Books { get; set; } = null!;
+        public DbSet<BookModel> Books { get; set; } = null!;
         
-        public DbSet<UserBook> UserBooks { get; set; } = null!;
+        public DbSet<UserBookModel> UserBooks { get; set; } = null!;
     }
 }

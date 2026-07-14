@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace MyReadingNookApp.Models;
 
 [Index(nameof(Isbn), IsUnique = true)]
-public class Book
+public class BookModel
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MyReadingNookApp.Models;
 
@@ -7,15 +8,16 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 46));
 
-// Register NookContext with Dependency Injection
+// Service for EF Core Db context
 builder.Services.AddDbContext<NookContext>(options =>
     options.UseMySql(connectionString, serverVersion)
 );
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+app.MapIdentityApi<IdentityUser>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -27,6 +29,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+app.MapIdentityApi<UserModel>();
 
 app.UseAuthorization();
 

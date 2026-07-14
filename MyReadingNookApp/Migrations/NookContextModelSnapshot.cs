@@ -22,7 +22,7 @@ namespace MyReadingNookApp.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("MyReadingNookApp.Models.Book", b =>
+            modelBuilder.Entity("MyReadingNookApp.Models.BookModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -52,7 +52,31 @@ namespace MyReadingNookApp.Migrations
                     b.ToTable("Books");
                 });
 
-            modelBuilder.Entity("MyReadingNookApp.Models.User", b =>
+            modelBuilder.Entity("MyReadingNookApp.Models.UserBookModel", b =>
+                {
+                    b.Property<DateTimeOffset>("AddedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BookModelId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserModelId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("BookModelId");
+
+                    b.HasIndex("UserModelId");
+
+                    b.ToTable("UserBooks");
+                });
+
+            modelBuilder.Entity("MyReadingNookApp.Models.UserModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -68,12 +92,11 @@ namespace MyReadingNookApp.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("varchar(15)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("PendingBookCount")
                         .HasColumnType("int");
@@ -83,48 +106,33 @@ namespace MyReadingNookApp.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Username", "Email")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("MyReadingNookApp.Models.UserBook", b =>
+            modelBuilder.Entity("MyReadingNookApp.Models.UserBookModel", b =>
                 {
-                    b.Property<DateTimeOffset>("AddedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("BookId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("BookId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserBooks");
-                });
-
-            modelBuilder.Entity("MyReadingNookApp.Models.UserBook", b =>
-                {
-                    b.HasOne("MyReadingNookApp.Models.Book", "Book")
+                    b.HasOne("MyReadingNookApp.Models.BookModel", "BookModel")
                         .WithMany()
-                        .HasForeignKey("BookId")
+                        .HasForeignKey("BookModelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MyReadingNookApp.Models.User", "User")
+                    b.HasOne("MyReadingNookApp.Models.UserModel", "UserModel")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UserModelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Book");
+                    b.Navigation("BookModel");
 
-                    b.Navigation("User");
+                    b.Navigation("UserModel");
                 });
 #pragma warning restore 612, 618
         }
