@@ -60,3 +60,5 @@ node_modules/
 TestResults/
 *.mstest
 *.testsettings
+/MyReadingNookApp/obj/Debug/net10.0
+/MyReadingNookApp/obj
