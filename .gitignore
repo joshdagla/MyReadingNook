@@ -1,1 +1,62 @@
 /MyReadingNookApp/bin/Debug/net10.0
+
+## ======= Build Artifacts and Outputs =======
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Ll]og/
+[Ll]ogs/
+*.binlog
+
+## ======= IDE Settings and Tooling =======
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+opened.dat
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+## ======= Configuration Secrets & Environment =======
+# Never commit actual production secrets or settings overrides
+appsettings.Development.json
+appsettings.Local.json
+*.secrets.json
+.env
+.env.*
+
+## ======= User-specific files =======
+*.rsuser
+*.userprefs
+
+## ======= Package Managers =======
+# NuGet Packages
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+/packages/
+
+# Frontend dependencies (if using ASP.NET Core with Angular/React/Blazor)
+node_modules/
+/wwwroot/lib/
+
+## ======= Testing Artifacts =======
+TestResults/
+*.mstest
+*.testsettings
