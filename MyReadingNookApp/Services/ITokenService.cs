@@ -2,8 +2,8 @@ namespace MyReadingNookApp.Services;
 
 public class TokenResult
 {
-    public string? Token { get; set; }
-    public DateTimeOffset? ExpiresAt { get; set; }
+    public string Token { get; set; }
+    public DateTimeOffset ExpiresAt { get; set; }
 }
 
 public interface ITokenService

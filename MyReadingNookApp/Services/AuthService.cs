@@ -8,10 +8,12 @@ namespace MyReadingNookApp.Services;
 public class AuthService : IAuthService
 {
     private readonly NookContext _context;
+    private readonly ITokenService _tokenService;
 
-    public AuthService(NookContext context)
+    public AuthService(NookContext context, ITokenService tokenService)
     {
         this._context = context;
+        this._tokenService = tokenService;
     }
 
     // RegisterAsync method to hash user password 
@@ -39,17 +41,22 @@ public class AuthService : IAuthService
                    PasswordHash = hashPassword,
                };
 
+               // User data is added and saved to DB
                _context.Users.Add(newUserModel);
                
                await _context.SaveChangesAsync();
-
+               
+               // Token is generated for user
+               var tokenResult = _tokenService.GenerateToken(newUserModel.Id, newUserModel.Username);
+               
+               // User is given success on registration, given a token for auto-login
                return new ServiceResult<AuthResponseDto>
                {
                    Success = true,
                    Data = new AuthResponseDto
                    {
-                       ExpiresAt =  DateTimeOffset.UtcNow.AddMinutes(60),
-                       Token = "RandomlyGeneratedToken", //TODO: Actual Jwt token functionality to be added
+                       ExpiresAt =  tokenResult.ExpiresAt,
+                       Token = tokenResult.Token,
                        UserInfo = new UserInfoDto
                        {
                            Id = newUserModel.Id,
@@ -81,13 +88,15 @@ public class AuthService : IAuthService
                 // Login credential are correct
                 if (verifyPassword)
                 {
+                    var tokenResult = _tokenService.GenerateToken(user.Id, user.Username);
+                    
                     return new ServiceResult<AuthResponseDto>
                     {
                         Success = true,
                         Data = new AuthResponseDto
                         {
-                            ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(60),
-                            Token = "RandomlyGeneratedToken", // TODO: Add jwt token functionality
+                            ExpiresAt = tokenResult.ExpiresAt,
+                            Token = tokenResult.Token,
                             UserInfo = new UserInfoDto
                             {
                                 Id = user.Id,
