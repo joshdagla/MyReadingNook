@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace MyReadingNookApp.Models
@@ -8,6 +9,9 @@ namespace MyReadingNookApp.Models
         public int UserId { get; set; }
         public int BookId { get; set; }
         public DateTimeOffset AddedAt { get; set; } = DateTimeOffset.UtcNow;
+        
+        [MaxLength(250)]
+        public string? UserNotes { get; set; }
 
         // Navigation properties
         public required UserModel UserModel { get; set; } = null;

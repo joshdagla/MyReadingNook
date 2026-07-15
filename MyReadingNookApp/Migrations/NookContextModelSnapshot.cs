@@ -69,6 +69,10 @@ namespace MyReadingNookApp.Migrations
                     b.Property<int>("UserModelId")
                         .HasColumnType("int");
 
+                    b.Property<string>("UserNotes")
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)");
+
                     b.HasIndex("BookModelId");
 
                     b.HasIndex("UserModelId");
