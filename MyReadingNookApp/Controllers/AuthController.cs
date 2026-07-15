@@ -1,6 +1,3 @@
-using System.Runtime.InteropServices.JavaScript;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyReadingNookApp.Dtos;
 using MyReadingNookApp.Services;
@@ -23,18 +20,32 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> RegisterUser([FromBody] RegisterRequestDto registerRequest)
     {
-        var result = await _authService.RegisterAsync(registerRequest);
+        try
+        {
+            var result = await _authService.RegisterAsync(registerRequest);
 
-        if (!result.Success) return Conflict(result);
-        return Created("User created successfully", result);
+            if (!result.Success) return Conflict(result);
+            return Created("User created successfully", result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequest)
     {
-        var result = await _authService.LoginAsync(loginRequest);
+        try
+        {
+            var result = await _authService.LoginAsync(loginRequest);
         
-        if (!result.Success) return Unauthorized(result);
-        return Ok(result);
+            if (!result.Success) return Unauthorized(result);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 }
