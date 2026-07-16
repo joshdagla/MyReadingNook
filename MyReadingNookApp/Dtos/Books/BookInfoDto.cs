@@ -10,4 +10,6 @@ public class BookInfoDto
     public string UserNote { get; set; }
 
     public string BookStatus { get; set; }
+
+    public int BookRating { get; set; }
 }
