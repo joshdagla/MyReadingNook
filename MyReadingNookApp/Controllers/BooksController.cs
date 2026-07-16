@@ -57,5 +57,4 @@ public class BooksController : ControllerBase
             return StatusCode(500, new { message = "Google Books API Error", details = ex.Message });
         }
     }
-
 }

@@ -32,7 +32,17 @@ namespace MyReadingNookApp.Migrations
 
                     b.Property<string>("Author")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(75)
+                        .HasColumnType("varchar(75)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("ImagePath")
+                        .HasMaxLength(300)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(300)");
 
                     b.Property<string>("Isbn")
                         .IsRequired()
@@ -40,14 +50,24 @@ namespace MyReadingNookApp.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(13)");
 
+                    b.Property<string>("Publisher")
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<int?>("UserModelId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Isbn")
                         .IsUnique();
+
+                    b.HasIndex("UserModelId");
 
                     b.ToTable("Books");
                 });
@@ -62,6 +82,13 @@ namespace MyReadingNookApp.Migrations
 
                     b.Property<int>("BookModelId")
                         .HasColumnType("int");
+
+                    b.Property<int>("BookRating")
+                        .HasColumnType("int");
+
+                    b.Property<string>("BookStatus")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -120,6 +147,13 @@ namespace MyReadingNookApp.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("MyReadingNookApp.Models.BookModel", b =>
+                {
+                    b.HasOne("MyReadingNookApp.Models.UserModel", null)
+                        .WithMany("BookLists")
+                        .HasForeignKey("UserModelId");
+                });
+
             modelBuilder.Entity("MyReadingNookApp.Models.UserBookModel", b =>
                 {
                     b.HasOne("MyReadingNookApp.Models.BookModel", "BookModel")
@@ -137,6 +171,11 @@ namespace MyReadingNookApp.Migrations
                     b.Navigation("BookModel");
 
                     b.Navigation("UserModel");
+                });
+
+            modelBuilder.Entity("MyReadingNookApp.Models.UserModel", b =>
+                {
+                    b.Navigation("BookLists");
                 });
 #pragma warning restore 612, 618
         }

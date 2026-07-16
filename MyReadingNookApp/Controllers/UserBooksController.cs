@@ -18,8 +18,10 @@ public class UserBooksController : ControllerBase
       this._nookContext = nookContext;
    }
 
+   // Allows user to update personal book info such as book status, rating and personal notes
+   // Book id is received from route and 
    [Authorize]
-   [HttpPut("{bookId}")]
+   [HttpPut("{bookId}")] // Route: /api/userbooks/{bookid}
    public async Task<IActionResult> BookInfoUpdate([FromBody] BookInfoDto bookInfoDto, [FromRoute] int bookId)
    {
        try

@@ -21,6 +21,8 @@ public class UserModel
 
     [Required]
     public string PasswordHash { get; set; }
+    
+    public List<BookModel>? BookLists { get; set; }
 
     public int TotalBookCount { get; set; } = 0;
 
