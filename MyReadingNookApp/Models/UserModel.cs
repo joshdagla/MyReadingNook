@@ -22,6 +22,7 @@ public class UserModel
     [Required]
     public string PasswordHash { get; set; }
     
+    // TODO: Need to alter book list functionality. Make a new model for book lists that has UserId for navigation
     public List<BookModel>? BookLists { get; set; }
 
     public int TotalBookCount { get; set; } = 0;

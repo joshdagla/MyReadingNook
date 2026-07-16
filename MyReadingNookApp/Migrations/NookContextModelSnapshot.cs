@@ -74,24 +74,24 @@ namespace MyReadingNookApp.Migrations
 
             modelBuilder.Entity("MyReadingNookApp.Models.UserBookModel", b =>
                 {
-                    b.Property<DateTimeOffset>("AddedAt")
-                        .HasColumnType("datetime(6)");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.Property<int>("BookId")
                         .HasColumnType("int");
 
+                    b.Property<DateTimeOffset>("AddedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int>("BookModelId")
                         .HasColumnType("int");
 
-                    b.Property<int>("BookRating")
+                    b.Property<int?>("BookRating")
                         .HasColumnType("int");
 
                     b.Property<string>("BookStatus")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
 
                     b.Property<int>("UserModelId")
                         .HasColumnType("int");
@@ -99,6 +99,8 @@ namespace MyReadingNookApp.Migrations
                     b.Property<string>("UserNotes")
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
+
+                    b.HasKey("UserId", "BookId");
 
                     b.HasIndex("BookModelId");
 

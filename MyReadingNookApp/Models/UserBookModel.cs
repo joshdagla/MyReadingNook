@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MyReadingNookApp.Models
 {
-    [Keyless]
     public class UserBookModel
     {
         public int UserId { get; set; }
@@ -14,14 +13,14 @@ namespace MyReadingNookApp.Models
         public string? UserNotes { get; set; }
 
         [AllowedValues("Wish to Read", "Completed", ErrorMessage = "Invalid Book Status")]
-        public string BookStatus { get; set; }
+        public string BookStatus { get; set; } = "Wish to Read";
 
         // Rating given out of 5 stars
         [AllowedValues(1, 2, 3, 4, 5, ErrorMessage = "Invalid Book Rating")]
-        public int BookRating { get; set; }
+        public int? BookRating { get; set; } = null;
 
         // Navigation properties
-        public required UserModel UserModel { get; set; } = null;
-        public required BookModel BookModel { get; set; } = null;
+        public UserModel UserModel { get; set; } = null!;
+        public BookModel BookModel { get; set; } = null!;
     }
 }
