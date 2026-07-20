@@ -1,0 +1,30 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <title style="font-family: 'Times New Roman',sans-serif">Login</title>
+</head>
+<body>
+<div class="container" style="max-width: 400px; margin-top: 80px; font-family: 'Times New Roman',sans-serif">
+    <h2 class="mb-4 text-center">Login</h2>
+
+    <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
+
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" placeholder="you@example.com">
+    </div>
+
+    <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" placeholder="Password">
+    </div>
+
+    <button type="button" id="loginBtn" class="btn btn-primary w-100">Login</button>
+</div>
+</body>
+</html>
