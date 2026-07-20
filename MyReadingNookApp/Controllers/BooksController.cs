@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using MyReadingNookApp.Services;
 using Microsoft.AspNetCore.Mvc;
 using MyReadingNookApp.Dtos.Books;
+using MyReadingNookApp.Extensions;
 using MyReadingNookApp.Models;
 
 namespace MyReadingNookApp.Controllers;
@@ -11,12 +13,15 @@ namespace MyReadingNookApp.Controllers;
 public class BooksController : ControllerBase
 {
     private readonly BookSearchService _bookService;
+    private readonly BookAddService _bookAddService;
 
-    public BooksController(BookSearchService bookService)
+    public BooksController(BookSearchService bookService, BookAddService bookAddService)
     {
         _bookService = bookService;
+        _bookAddService = bookAddService;
     }
-
+    
+    // Controller to search and query books from Google books api
     [HttpGet("search")] // Route resolves to: api/books/search
     public async Task<IActionResult> SearchBooks(
         [FromQuery] string? title, 
@@ -36,13 +41,13 @@ public class BooksController : ControllerBase
         {
             var books = await _bookService.SearchBooksAsync(title, author, isbn, maxResults);
 
-            if (books == null || !books.Any())
+            if (!books.Any())
             {
                 return NotFound(new { message = "No books found matching your criteria." });
             }
 
             var formattedResponse = books
-                .Where(b => b.VolumeInfo.IndustryIdentifiers?.Any(i => i.Type == "ISBN_13" || i.Type == "ISBN_10") ?? false)
+                .Where(b => b.VolumeInfo.IndustryIdentifiers?.Any(i => i.Type is "ISBN_13" or "ISBN_10") ?? false)
                 .Select(b => new
             {
                 Id = b.Id,
@@ -63,6 +68,31 @@ public class BooksController : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, new { message = "Google Books API Error", details = ex.Message });
+        }
+    }
+
+    // Controller to add book to collection and UserBook Table
+    [Authorize]
+    [HttpPost("add")] // Route: /add
+    public async Task<IActionResult> AddBook([FromBody] BookAddDto bookAddDto)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            
+            var result = await _bookAddService.BookAddAsync(bookAddDto, userId);
+
+            if (!result.Success)
+            {
+                return BadRequest(result.ErrorMessage);
+            }
+            
+            return Ok(result);
+
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
         }
     }
 }
