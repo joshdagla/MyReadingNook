@@ -20,5 +20,7 @@ namespace MyReadingNookApp.Models
             modelBuilder.Entity<UserBookModel>()
                 .HasKey(ub => new {ub.UserId,ub.BookId });
         }
+        
+        public DbSet<BookListModel> BookLists { get; set; }
     }
 }
