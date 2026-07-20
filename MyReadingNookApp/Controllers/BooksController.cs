@@ -41,14 +41,20 @@ public class BooksController : ControllerBase
                 return NotFound(new { message = "No books found matching your criteria." });
             }
 
-            var formattedResponse = books.Select(b => new
+            var formattedResponse = books
+                .Where(b => b.VolumeInfo.IndustryIdentifiers?.Any(i => i.Type == "ISBN_13" || i.Type == "ISBN_10") ?? false)
+                .Select(b => new
             {
                 Id = b.Id,
                 Title = b.VolumeInfo.Title,
-                Authors = b.VolumeInfo.Authors ?? new List<string> { "Unknown Author" },
+                Authors = b.VolumeInfo.Authors != null
+                ? string.Join(", ", b.VolumeInfo.Authors)
+                : "Unknown Author(s)",
                 Publisher = b.VolumeInfo.Publisher,
                 Description = b.VolumeInfo.Description,
-                ISBN = b.VolumeInfo.IndustryIdentifiers?.Select(i => new { i.Type, i.Identifier }),
+                Isbn = b.VolumeInfo.IndustryIdentifiers?.FirstOrDefault(i => i.Type == "ISBN_13")?.Identifier
+                       ?? b.VolumeInfo.IndustryIdentifiers?.FirstOrDefault(i => i.Type == "ISBN_10")?.Identifier
+                       ?? "",
                 Thumbnail = b.VolumeInfo.ImageLinks?.Thumbnail
             });
 
