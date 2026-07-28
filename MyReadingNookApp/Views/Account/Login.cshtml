@@ -34,9 +34,13 @@
                                 <input type="email" id="email" class="form-control form-control-lg" placeholder="you@example.com">
                             </div>
 
-                            <div class="mb-4">
-                                <label class="form-label" for="password">Password</label>
+                            
+                            <label class="form-label" for="password">Password </label>
+                            <div class="input-group mb-4">
                                 <input type="password" id="password" class="form-control form-control-lg" placeholder="Password">
+                                <button type="button" id="showPasswordBtn" class="btn bg-white btn-sm">
+                                <img src="images/showPassword.png" style="max-width: 20px">    
+                                </button> 
                             </div>
 
                             <div class="pt-1 mb-4">
@@ -67,9 +71,12 @@
                                 <input type="email" id="emailRegister" class="form-control form-control-lg" placeholder="you@example.com">
                             </div>
 
-                            <div class="mb-4">
-                                <label class="form-label" for="passwordRegister">Password</label>
+                            <label class="form-label" for="passwordRegister">Password</label>
+                            <div class="input-group mb-4">
                                 <input type="password" id="passwordRegister" class="form-control form-control-lg" placeholder="Password">
+                                <button type="button" id="togglePasswordBtn" class="btn bg-white btn-sm">
+                                    <img src="images/showPassword.png" style="max-width: 20px">    
+                                </button> 
                             </div>
 
                             <div class="pt-1 mb-4">
@@ -165,6 +172,24 @@
                         $("#registerError").removeClass("d-none").text(message);
                     }
                 });
+            });
+
+            $("#showPasswordBtn").on("click", function () {
+                // Correct way to check the attribute value
+                if ($("#password").attr("type") === "password") {
+                    $("#password").attr("type", "text"); // Added # symbol
+                } else {
+                    $("#password").attr("type", "password"); // Added # symbol
+                }
+            });
+            
+            $("#togglePasswordBtn").on("click", function () {
+                // Correct way to check the attribute value
+                if ($("#passwordRegister").attr("type") === "password") {
+                    $("#passwordRegister").attr("type", "text"); // Added # symbol
+                } else {
+                    $("#passwordRegister").attr("type", "password"); // Added # symbol
+                }
             });
         });
     </script>
