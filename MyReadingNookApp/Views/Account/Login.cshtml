@@ -1,30 +1,171 @@
 @{
     ViewData["Title"] = "Login";
+    ViewData["HideHeader"] = "true";
 }
 
-<!DOCTYPE html>
+@section Header
+{
+    <!-- Left empty so that header does not render in Login page -->
+}
 
-<html lang="en">
-<head>
-    <title style="font-family: 'Times New Roman',sans-serif">Login</title>
-</head>
-<body>
-<div class="container" style="max-width: 400px; margin-top: 80px; font-family: 'Times New Roman',sans-serif">
-    <h2 class="mb-4 text-center">Login</h2>
 
-    <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
+<section class="vh-100 d-flex align-items-center" style="background-color: #F1E9D2">
+    <div class="container-fluid">
+        <div class="row justify-content-center align-items-center">
 
-    <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="email" placeholder="you@example.com">
+            <div class="col-sm-6 text-black" style="font-family: 'Calisto MT', sans-serif;">
+
+                <div class="d-flex align-items-center px-5 pt-3 ms-xl-2">
+                    <img src="~/images/books-stack-of-three.png" alt="Logo" class="img-fluid me-2" style="max-width: 60px;">
+                    <span class="h1 fw-bold mb-0">MyReadingNook</span>
+                </div>
+
+                <div id="loginFormContainer">
+                    <div class="d-flex align-items-center px-5 ms-xl-4 mt-4">
+
+                        <form style="width: 23rem;">
+
+                            <h1 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">Log in</h1>
+
+                            <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
+
+                            <div class="mb-4">
+                                <label class="form-label" for="email">Email address</label>
+                                <input type="email" id="email" class="form-control form-control-lg" placeholder="you@example.com">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label" for="password">Password</label>
+                                <input type="password" id="password" class="form-control form-control-lg" placeholder="Password">
+                            </div>
+
+                            <div class="pt-1 mb-4">
+                                <button class="btn btn-dark btn-lg btn-block w-100" id="loginBtn" type="button">Login</button>
+                            </div>
+
+                            <p>Don't have an account? <a href="#" id="showRegisterLink" class="text-dark link-info">Register here</a></p>
+
+                        </form>
+                        
+                    </div>
+                </div>
+                <div id="registerFormContainer" class="d-none">
+                    <div class="d-flex align-items-center px-5 ms-xl-4 mt-4">                        
+                        
+                        <form style="width: 23rem">
+                            <h1 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">Register</h1>
+
+                            <div id="registerError" class="alert alert-danger d-none" role="alert"></div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label" for="username">Username</label>
+                                <input type="text" id="username" class="form-control form-control-lg" placeholder="Username">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label" for="emailRegister">Email address</label>
+                                <input type="email" id="emailRegister" class="form-control form-control-lg" placeholder="you@example.com">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label" for="passwordRegister">Password</label>
+                                <input type="password" id="passwordRegister" class="form-control form-control-lg" placeholder="Password">
+                            </div>
+
+                            <div class="pt-1 mb-4">
+                                <button class="btn btn-dark btn-lg btn-block w-100" id="registerBtn" type="button">Register</button>
+                            </div>
+
+                            <p>Already have an Account? <a href="#" id="showLoginLink" class="text-dark link-info">Login here</a></p>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+                <div class="col-sm-6 px-0 d-none d-sm-block">
+                    <img src="https://klinecollective.com/cdn/shop/files/MidnightDeskLamp.jpg?v=1784030712&width=1500"
+                         alt="Login image" class="w-100 vh-100" style="object-fit: cover; object-position: left;">
+                </div>
+
+        </div>
     </div>
+</section>
+<style>
+    .bg-image-vertical {
+        position: relative;
+        overflow: hidden;
+        background-repeat: no-repeat;
+        background-position: right center;
+        background-size: auto 100%;
+    }
 
-    <div class="mb-3">
-        <label for="password" class="form-label">Password</label>
-        <input type="password" class="form-control" id="password" placeholder="Password">
-    </div>
+    @@media (min-width: 1025px) {
+        .h-custom-2 {
+            height: 100%;
+        }
+    }
+</style>
 
-    <button type="button" id="loginBtn" class="btn btn-primary w-100">Login</button>
-</div>
-</body>
-</html>
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            $("#showRegisterLink").on("click", function (event) {
+                event.preventDefault();
+                $("#loginFormContainer").addClass("d-none");
+                $("#registerFormContainer").removeClass("d-none");
+            });
+
+            $("#showLoginLink").on("click", function (event) {
+                event.preventDefault();
+                $("#registerFormContainer").addClass("d-none");
+                $("#loginFormContainer").removeClass("d-none");
+            });
+            $("#loginBtn").on("click", function () {
+                $("#loginError").addClass("d-none").text("");
+
+                $.ajax({
+                    url: "/api/Auth/login",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        email: $("#email").val(),
+                        password: $("#password").val()
+                    }),
+                    success: function (response) {
+                        sessionStorage.setItem("authToken", response.token);
+                        window.location.href = "/Home/Index";
+                    },
+                    error: function (xhr) {
+                        let message = xhr.responseJSON?.errorMessage ?? "Login failed. Please try again.";
+                        $("#loginError").removeClass("d-none").text(message);
+                    }
+                });
+            });
+            
+            $("#registerBtn").on("click", function () {
+                $("#registerError").addClass("d-none").text("");
+                
+                $.ajax({
+                    url: "/api/Auth/register",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        username: $("#username").val(),
+                        email: $("#emailRegister").val(),
+                        password: $("#passwordRegister").val()
+                    }),
+                    success: function (response) {
+                        sessionStorage.setItem("authToken", response.token);
+                        window.location.href = "/Home/Index";
+                    },
+                    error: function (xhr) {
+                        let message = xhr.responseJSON?.errorMessage ?? "User creation failed. Please try again.";
+                        $("#registerError").removeClass("d-none").text(message);
+                    }
+                });
+            });
+        });
+    </script>
+}

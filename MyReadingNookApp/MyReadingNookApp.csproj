@@ -31,4 +31,8 @@
     <_ContentIncludedByDefault Remove="Frontend\package.json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\images\books-stack-of-three.png" />
+  </ItemGroup>
+
 </Project>
