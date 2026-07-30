@@ -20,6 +20,8 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<BookSearchService>();
+builder.Services.AddScoped<BookAddService>();
 
 builder.Services.AddAuthentication(options =>
     {
@@ -40,8 +42,6 @@ builder.Services.AddAuthentication(options =>
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
-
-builder.Services.AddSingleton<BookSearchService>();
 
 var app = builder.Build();
 

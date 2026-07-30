@@ -52,7 +52,7 @@ public class BooksController : ControllerBase
             {
                 Id = b.Id,
                 Title = b.VolumeInfo.Title,
-                Authors = b.VolumeInfo.Authors != null
+                Author = b.VolumeInfo.Authors != null
                 ? string.Join(", ", b.VolumeInfo.Authors)
                 : "Unknown Author(s)",
                 Publisher = b.VolumeInfo.Publisher,

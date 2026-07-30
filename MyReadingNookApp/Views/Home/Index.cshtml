@@ -2,17 +2,18 @@
     ViewData["Title"] = "MyReadingNook";
 }
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="search-container">
-                    <input type="text" class="form-control search-input" placeholder="Search...">
-                    <i class="fas fa-search search-icon"></i>
-                </div>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="search-container">
+                <input type="text" id="searchInput" class="form-control search-input" placeholder="Search...">
+                <i class="fas fa-search search-icon"></i>
+                <div id="searchResults" class="search-dropdown"></div>
             </div>
         </div>
-    </div> 
+    </div>
+</div>
 
 <style>
     .search-container {
@@ -33,5 +34,85 @@
         left: 15px;
         transform: translateY(-50%);
         color: #888;
-    } 
+    }
+
+    .search-dropdown {
+        position: absolute;
+        top: 55px;
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        max-height: 400px;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+
+    .search-result-item {
+        padding: 10px 15px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .search-result-item img {
+        width: 40px;
+        height: 60px;
+        object-fit: cover;
+    }
 </style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            let searchTimeout;
+
+            $("#searchInput").on("input", function () {
+                clearTimeout(searchTimeout);
+                const query = $(this).val().trim();
+
+                if (query.length === 0) {
+                    $("#searchResults").empty();
+                    return;
+                }
+
+                searchTimeout = setTimeout(function () {
+                    $.ajax({
+                        url: "/api/Books/search",
+                        method: "GET",
+                        data: { title: query },
+                        success: function (response) {
+                            $("#searchResults").empty();
+
+                            response.forEach(function (book) {
+                                const thumbnail = book.thumbnail || "https://via.placeholder.com/40x60?text=No+Image";
+
+                                const resultHtml = `
+                                    <div class="search-result-item">
+                                        <img src="${thumbnail}" alt="${book.title}">
+                                        <div>
+                                            <div><strong>${book.title}</strong></div>
+                                            <div class="text-muted" style="font-size: 0.85em;">${book.author}</div>
+                                        </div>
+                                    </div>
+                                `;
+                                $("#searchResults").append(resultHtml);
+                            });
+                        },
+                        error: function (xhr) {
+                            $("#searchResults").empty();
+                        }
+                    });
+                }, 400);
+            });
+
+            $(document).on("click", function (event) {
+                if (!$(event.target).closest(".search-container, #searchResults").length) {
+                    $("#searchResults").empty();
+                }
+            });
+        });
+    </script>
+}
