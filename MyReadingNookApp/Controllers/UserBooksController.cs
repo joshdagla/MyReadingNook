@@ -19,7 +19,7 @@ public class UserBooksController : ControllerBase
    }
 
    // Allows user to update personal book info such as book status, rating and personal notes
-   // Book id is received from route and 
+   // Book id is received from route
    [Authorize]
    [HttpPut("{bookId}")] // Route: /api/userbooks/{bookid}
    public async Task<IActionResult> BookInfoUpdate([FromBody] BookInfoDto bookInfoDto, [FromRoute] int bookId)

@@ -97,6 +97,32 @@ public class BooksController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
-    
-    public async 
+
+    [Authorize]
+    [HttpGet("bookDetail")]
+    public async Task<IActionResult> GetBookDetails([FromQuery] string isbn)
+    {
+        try
+        {
+            int userId = User.GetUserId();
+            var result = await _bookDetailService.GetBookDetailsAsync(isbn, userId);
+
+            if (!result.Success)
+            {
+                return BadRequest(result.ErrorMessage);
+            }
+
+            return Ok(result.Data);
+        }
+        catch (KeyNotFoundException e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
 }
