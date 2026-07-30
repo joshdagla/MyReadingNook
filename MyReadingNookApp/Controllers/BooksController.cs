@@ -14,11 +14,13 @@ public class BooksController : ControllerBase
 {
     private readonly BookSearchService _bookService;
     private readonly BookAddService _bookAddService;
+    private readonly BookDetailService _bookDetailService;
 
-    public BooksController(BookSearchService bookService, BookAddService bookAddService)
+    public BooksController(BookSearchService bookService, BookAddService bookAddService, BookDetailService bookDetailService)
     {
         _bookService = bookService;
         _bookAddService = bookAddService;
+        _bookDetailService = bookDetailService;
     }
     
     // Controller to search and query books from Google books api
@@ -95,4 +97,6 @@ public class BooksController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
+    
+    public async 
 }

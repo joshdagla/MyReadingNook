@@ -16,7 +16,7 @@ public class BookDetailsResponseDto
 
     public bool IsInCollection { get; set; }
 
-    public UserBookInfoDto? UserBookInfoDto { get; set; }
+    public UserBookInfoDto? UserBookInfo { get; set; }
 }
 
 public class UserBookInfoDto
