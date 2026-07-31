@@ -1,0 +1,107 @@
+@{
+    ViewData["Title"] = "Book Details";
+    Layout = "_Layout";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<div class="container mt-5" style="font-family: 'Calisto MT', sans-serif">
+    <div class="row">
+        <div class="col-md-4 text-center">
+            <img id="bookCover" src="" alt="Book cover" class="img-fluid rounded shadow" style="max-height: 500px;">
+            <div class="rating-card p-4 d-none">
+                <div class="star-rating animated-stars">
+                    <input type="radio" id="star5" name="rating" value="5">
+                    <label for="star5" class="bi bi-star-fill"></label>
+                    <input type="radio" id="star4" name="rating" value="4">
+                    <label for="star4" class="bi bi-star-fill"></label>
+                    <input type="radio" id="star3" name="rating" value="3">
+                    <label for="star3" class="bi bi-star-fill"></label>
+                    <input type="radio" id="star2" name="rating" value="2">
+                    <label for="star2" class="bi bi-star-fill"></label>
+                    <input type="radio" id="star1" name="rating" value="1">
+                    <label for="star1" class="bi bi-star-fill"></label>
+                </div>
+                <p class="text-muted mt-2">Click to rate</p>
+            </div> 
+        </div>
+        <div class="col-md-8">
+            <h1 id="bookTitle" class="mb-2"></h1>
+            <h5 id="bookAuthor" class="text-muted mb-4"></h5>
+
+            <p><strong>Publisher:</strong> <span id="bookPublisher"></span></p>
+            <p><strong>ISBN:</strong> <span id="bookIsbn"></span></p>
+
+            <hr>
+
+            <p><strong>Description:</strong> <span id="bookDescription"></span></p>
+        </div>
+    </div>
+</div>
+<div class="d-flex align-items-center justify-content-center mt-4" style="font-family: 'Calisto MT', sans-serif">
+    <button class="btn btn-success btn-lg">Add to Collection</button>
+</div>
+
+<style>
+    .star-rating {
+        direction: rtl;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .star-rating input {
+        display: none;
+    }
+
+    .star-rating label {
+        color: #ddd;
+        font-size: 24px;
+        padding: 0 2px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .star-rating label:hover,
+    .star-rating label:hover~label,
+    .star-rating input:checked~label {
+        color: #ffc107;
+    } 
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            const isbn = new URLSearchParams(window.location.search).get("isbn");
+            $.ajax({
+                url: "/api/Books/bookDetail",
+                method: "GET",
+                data: {isbn: isbn},
+                headers: {
+                    Authorization: "Bearer " + sessionStorage.getItem("authToken"),
+                },
+                success: function (response) {
+                    $("#bookCover").attr("src", response.thumbnail);
+                    $("#bookTitle").text(response.title);
+                    $("#bookAuthor").text(response.author);
+                    $("#bookPublisher").text(response.publisher);
+                    $("#bookDescription").text(response.description);
+                    $("#bookIsbn").text(response.isbn);
+                },
+                error: function (xhr) {
+                    console.log("Failed to load book data", xhr.responseJSON);
+                }
+            });
+            $.ajax({
+                
+            })
+
+            document.querySelectorAll('.star-rating:not(.readonly) label').forEach(star => {
+                star.addEventListener('click', function() {
+                    this.style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 200);
+                });
+            });
+        });
+    </script>
+}

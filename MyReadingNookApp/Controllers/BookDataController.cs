@@ -4,7 +4,7 @@ namespace MyReadingNookApp.Controllers;
 
 public class BookDataController : Controller
 {
-    public IActionResult Login()
+    public IActionResult Details()
     {
         return View();
     }

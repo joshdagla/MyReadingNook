@@ -35,4 +35,8 @@
     <None Include="wwwroot\images\books-stack-of-three.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\book_covers\" />
+  </ItemGroup>
+
 </Project>

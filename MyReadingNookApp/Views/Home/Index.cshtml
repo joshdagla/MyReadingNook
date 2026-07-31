@@ -90,14 +90,13 @@
                                 const thumbnail = book.thumbnail || "https://via.placeholder.com/40x60?text=No+Image";
 
                                 const resultHtml = `
-                                    <div class="search-result-item">
-                                        <img src="${thumbnail}" alt="${book.title}">
-                                        <div>
-                                            <div><strong>${book.title}</strong></div>
-                                            <div class="text-muted" style="font-size: 0.85em;">${book.author}</div>
-                                        </div>
-                                    </div>
-                                `;
+                                            <div class="search-result-item" data-isbn="${book.isbn}">
+                                                <img src="${thumbnail}" alt="${book.title}">
+                                                <div>
+                                                    <div><strong>${book.title}</strong></div>
+                                                    <div class="text-muted" style="font-size: 0.85em;">${book.author}</div>
+                                                </div>
+                                            </div>`;
                                 $("#searchResults").append(resultHtml);
                             });
                         },
@@ -112,6 +111,11 @@
                 if (!$(event.target).closest(".search-container, #searchResults").length) {
                     $("#searchResults").empty();
                 }
+            });
+            
+            $(document).on("click", ".search-result-item", function (event) {
+                const isbn = $(this).data("isbn");
+                window.location.href = "/BookData/Details?isbn=" + encodeURIComponent(isbn);
             });
         });
     </script>

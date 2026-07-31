@@ -141,7 +141,7 @@
                         password: $("#password").val()
                     }),
                     success: function (response) {
-                        sessionStorage.setItem("authToken", response.token);
+                        sessionStorage.setItem("authToken", response.data.token);
                         window.location.href = "/Home/Index";
                     },
                     error: function (xhr) {
