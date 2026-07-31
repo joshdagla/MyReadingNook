@@ -72,6 +72,7 @@ public class BookAddService : IBookAddService
             Isbn = bookAddDto.Isbn,
             Publisher = bookAddDto.Publisher,
             Description = bookAddDto.Description,
+            ImagePath =  bookAddDto.ImagePath,
         };
 
         UserBookModel addUserBookModel = new UserBookModel

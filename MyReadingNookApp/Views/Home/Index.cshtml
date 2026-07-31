@@ -87,11 +87,11 @@
                             $("#searchResults").empty();
 
                             response.forEach(function (book) {
-                                const thumbnail = book.thumbnail || "https://via.placeholder.com/40x60?text=No+Image";
+                                const imagePath = book.thumbnail || "https://via.placeholder.com/40x60?text=No+Image";
 
                                 const resultHtml = `
                                             <div class="search-result-item" data-isbn="${book.isbn}">
-                                                <img src="${thumbnail}" alt="${book.title}">
+                                                <img src="${imagePath}" alt="${book.title}">
                                                 <div>
                                                     <div><strong>${book.title}</strong></div>
                                                     <div class="text-muted" style="font-size: 0.85em;">${book.author}</div>
