@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MyReadingNookApp.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
 <body style="background-color: #F1E9D2">
 
@@ -24,39 +25,83 @@ else
     <div class="container-fluid">
         <div class="row flex-nowrap">
             <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0" style="background-color: #e0d5b9; font-family: 'Calisto MT', sans-serif">
-                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-dark min-vh-100">
+                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 pb-4 text-dark min-vh-100">
                     <a class="d-flex align-items-center pb-3 mb-md-0 me-md-auto mt-4 text-dark text-decoration-none">
                         <img src="~/images/books-stack-of-three.png" alt="Logo" style="max-width: 40px;" class="me-2">
                         <span class="fs-3 d-none d-sm-inline">MyReadingNook</span>
                     </a>
 
-                    <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
-                        <li class="nav-item">
-                            <a asp-area="" asp-controller="Home" asp-action="Index"style="color: black"  class="nav-link align-middle px-0">
-                                <i class="fs-3 bi-house"></i> <span class="fs-4 ms-1 d-none d-sm-inline">Book Portal</span>
+                    <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100" id="menu">
+                        <li class="nav-item w-100">
+                            <a asp-area="" asp-controller="Home" asp-action="Index" style="color: black" class="nav-link align-middle px-2 py-2 sidebar-link">
+                                <i class="fs-3 bi-house"></i> <span class="fs-4 ms-2 d-none d-sm-inline">My Books</span>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a asp-area="" asp-controller="Home" asp-action="MyBooks" style="color: black" class="nav-link align-middle px-0">
-                                <i class="fs-3 bi-book"></i> <span class="fs-4 ms-1 d-none d-sm-inline">My Books</span>
+                        <li class="nav-item w-100">
+                            <a asp-area="" asp-controller="Home" asp-action="MyBooks" style="color: black" class="nav-link align-middle px-2 py-2 sidebar-link">
+                                <i class="fs-3 bi-book"></i> <span class="fs-4 ms-2 d-none d-sm-inline">My Collections</span>
                             </a>
                         </li>
                     </ul>
 
-                    <hr class="text-white w-100">
+                    <hr class="w-75" style="border-top: 1px solid rgba(0,0,0,0.2);">
 
-                    <div class="pb-2 w-60 nav-item">
-                        <i class="fs-3 bi bi-arrow-left"></i>
-                        <a href="/Account/Login" class="fs-4 d-sm-inline mx-1" style="color: black"  id="logoutBtn">Logout</a>
+                    <div class="w-100 nav-item mb-3">
+                        <a href="/Account/Login" id="logoutBtn" class="d-flex align-items-center px-2 py-2 fs-4 text-decoration-none sidebar-link" style="color: black">
+                            <i class="fs-3 bi bi-arrow-left me-2"></i>
+                            <span class="d-none d-sm-inline">Logout</span>
+                        </a>
                     </div>
                 </div>
             </div>
             
 
             <div class="col py-3">
-                @RenderBody()
+                <div class="container-fluid">
+                    <div class="d-flex align-items-center mb-4 gap-4">
+
+                        <div class="search-container flex-grow-0" style="font-family: 'Calisto MT', sans-serif; width: 66.66%">
+                            <input type="text" id="searchInput" class="form-control mx-2 fs-5 fw-medium search-input" placeholder="Discover Books...">
+                            <i class="fas fa-search search-icon"></i>
+                            <div id="searchResults" class="search-dropdown"></div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2 ms-auto me-3">
+                            <i id="friendsBtn" class="btn icon-custom fs-2 bi bi-people-fill"></i>
+                            <i id="bellBtn" class="btn icon-custom fs-2 bi bi-bell-fill"></i>
+                        </div>
+
+                        <div id="userProfileGrp" class="btn icon-custom d-flex align-items-center gap-2">
+                            <i class="fs-1 bi bi-person-circle"></i>
+                            <span id="usernameDisplay" class="text-custom fs-3 fw-medium" style="font-family: 'Times New Roman', sans-serif">Josh Dagla</span>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <div class="container-fluid p-0">
+                    <div class="row">
+
+                        <div class="col-md-9 col-12 order-2 order-md-1">
+                            @RenderBody()
+                        </div>
+
+                        <div class="col-md col-12 order-1 order-md-2 d-flex flex-column gap-3" style="width: 20.83%; flex: 0 0 auto;">
+                            <div class="data-card">
+                                <h2>Currently Reading...</h2>
+                            </div>
+
+                            <div class="text-center link-data-card">
+                                <i class="fs-2 bi bi-share-fill" style="color: #625d47"></i>
+                                <h2>Generate friend link</h2>
+                                <p>Let your friends know what more about your book interests and collection</p>
+                                <button class="btn share-button">Generate Link</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
-            
             
         </div>
     </div>
@@ -71,11 +116,124 @@ else
 </html>
 
 <style>
-    .nav-item:hover {
-        background: #c7b790;
-        border-color: #c7b790;
-        padding: 3px;
-        transition: background-color 0.3s ease-in-out;
+    body {
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .col.py-3 {
+        height: 100vh;
+        overflow-y: auto;
+    }
+    
+    .sidebar-link {
+        border-radius: 8px;
+        transition: background-color 0.15s ease-in-out, padding-left 0.15s ease-in-out;
+    }
+
+    .sidebar-link:hover {
+        background-color: rgba(0, 0, 0, 0.08);
+        padding-left: 0.75rem;
+    }
+
+    #logoutBtn:hover {
+        background-color: rgba(178, 34, 34, 0.1);
+        color: #8b1a1a !important;
+    }    
+    .share-button {
+        color: #4d4835;
+        background-color: #c7b790;
+    }
+    
+    .share-button:hover {
+        background-color: #c7b790;
+        color: #fff;
+        transition: color 0.3s ease-in-out;
+    }
+    
+    .link-data-card {
+        font-family: 'Calisto MT', sans-serif;
+        color: #625d47;
+        border: none;
         border-radius: 10px;
+        background-color: #e0d5b9;
+        height: 21vh;
+        padding: 20px;
+    }
+    
+    .data-card {
+        font-family: 'Calisto MT', sans-serif;
+        color: #625d47;
+        border: none;
+        border-radius: 10px;
+        background-color: #e0d5b9;
+        height: 45vh;
+        padding: 20px;
+    }
+    
+    .text-custom {
+        color: #625d47;
+        transition: color 0.3s ease-in-out, background-color 0.3s ease-in-out;
+    }
+
+    .text-custom:hover {
+        color: white;
+        background-color: #c7b790;
+    }    
+
+    .icon-custom {
+        color: #b9a677;
+        transition: color 0.3s ease-in-out, background-color 0.3s ease-in-out;
+    }
+
+    .icon-custom:hover {
+        color: white;
+        background-color: #c7b790;
+    }
+    
+    .search-container {
+        position: relative;
+    }
+
+    .search-input {
+        height: 50px;
+        border-radius: 30px;
+        padding-left: 35px;
+        background: #f1e7c8;
+    }
+
+    .search-icon {
+        position: absolute;
+        top: 50%;
+        left: 15px;
+        transform: translateY(-50%);
+        color: #888;
+    }
+
+    .search-dropdown {
+        position: absolute;
+        top: 55px;
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        max-height: 400px;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+
+    .search-result-item {
+        padding: 10px 15px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .search-result-item img {
+        width: 40px;
+        height: 60px;
+        object-fit: cover;
     }
 </style>

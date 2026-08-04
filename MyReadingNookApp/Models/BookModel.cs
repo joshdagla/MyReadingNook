@@ -28,6 +28,7 @@ public class BookModel
     [MaxLength(30)]
     public string? Publisher { get; set; }
 
+    // TODO: Fix Max length bug for descriptions
     [MaxLength(500)]
     public string? Description { get; set; }
 

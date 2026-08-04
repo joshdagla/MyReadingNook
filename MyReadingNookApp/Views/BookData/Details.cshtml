@@ -8,8 +8,8 @@
     <div class="row">
         <div class="col-md-4 text-center">
             <img id="bookCover" src="" alt="Book cover" class="img-fluid rounded shadow" style="max-height: 700px;">
-            <div id="starRating" class="rating-card p-4 d-none">
-                <div class="star-rating animated-stars">
+            <div id="hiddenGrp" class="rating-card p-4 d-none">
+                <div id="starRating" class="star-rating animated-stars">
                     <input type="radio" id="star5" name="rating" value="5">
                     <label for="star5" class="bi bi-star-fill"></label>
                     <input type="radio" id="star4" name="rating" value="4">
@@ -22,6 +22,8 @@
                     <label for="star1" class="bi bi-star-fill"></label>
                 </div>
                 <p class="text-muted mt-2">Click to rate</p>
+                
+                <button id="removeBtn" class="btn btn-danger mt-4">Remove from Collection</button>
             </div> 
         </div>
         <div class="col-md-8">
@@ -43,10 +45,28 @@
         <div id="addError" class="alert alert-danger d-none mt-2" role="alert"></div>
         
         <div id="bookStatusBtnGrp" class="btn-group d-none" role="group">
-            <button id="wishToReadBtn" class="btn btn-outline-success active">Wish to Read</button>
-            <button id="completedBtn" class="btn btn-outline-success">Completed</button>
+            <button id="wishToReadBtn" class="btn status-btn btn-outline-success active">Wish to Read</button>
+            <button id="currentlyReadingBtn" class="btn status-btn btn-outline-light active">Currently Reading</button>
+            <button id="completedBtn" class="btn status-btn btn-outline-light active">Completed</button>
         </div>
-    </div>
+        
+        <div id="notesCardSection" class="notes-card d-none">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h2 class="mb-0">My Notes</h2>
+                <button id="editNoteBtn" class="btn btn-sm notes-edit-btn">Edit</button>
+            </div>
+
+            <p id="noteText" class="notes-text">Click Edit to add your thoughts on this book...</p>
+            <small id="noteTimestamp" class="notes-timestamp d-none"></small>
+
+            <textarea id="noteTextarea" class="form-control d-none" rows="4"></textarea>
+
+            <div class="d-flex gap-2 mt-2">
+                <button id="saveNoteBtn" class="btn notes-save-btn d-none">Save</button>
+                <button id="cancelNoteBtn" class="btn notes-cancel-btn d-none">Cancel</button>
+            </div>
+        </div>
+        </div>
 </div>
 
 <style>
@@ -61,7 +81,7 @@
     }
 
     .star-rating label {
-        color: #ddd;
+        color: #736f6f;
         font-size: 24px;
         padding: 0 2px;
         cursor: pointer;
@@ -72,7 +92,44 @@
     .star-rating label:hover~label,
     .star-rating input:checked~label {
         color: #ffc107;
-    } 
+    }
+
+    .notes-card {
+        background-color: #F1E9D2;
+        border-radius: 12px;
+        padding: 1.5rem;
+        font-family: 'Calisto MT', sans-serif;
+    }
+
+    .notes-text {
+        white-space: pre-wrap;
+    }
+
+    .notes-timestamp {
+        color: #8a8371;
+        font-style: italic;
+        display: block;
+        margin-top: -0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .notes-edit-btn {
+        background-color: transparent;
+        border: 1px solid #625d47;
+        color: #625d47;
+    }
+
+    .notes-save-btn {
+        background-color: #625d47;
+        color: #fff;
+    }
+
+    .notes-cancel-btn {
+        background-color: transparent;
+        border: 1px solid #b8ae94;
+        color: #625d47;
+    }
+    
 </style>
 
 @section Scripts {
@@ -118,11 +175,13 @@
                         publisher: currentBook.publisher,
                         description: currentBook.description,
                         isbn: currentBook.isbn,
-                        imagePath: currentBook.imagePath,
+                        imagePath: currentBook.thumbnail,
                     }),
                     success: function () {
                         $("#addToCollectionBtn").text("Book Added to Collection").prop("disabled", true).addClass("d-none");
-                        $("starRating").removeClass("d-none");
+                        $("hiddenGrp").removeClass("d-none");
+                        $("#bookStatusBtnGrp").removeClass("d-none");
+                        $("#notesCardSection").removeClass("d-none");
                     },
                     error: function (xhr) {
                         $("#addError").removeClass("d-none").text(xhr.responseJSON?.errorMessage ?? "Failed to add book");
@@ -137,6 +196,38 @@
                         this.style.transform = 'scale(1)';
                     }, 200);
                 });
+            });
+
+            $(".status-btn").on("click", function () {
+                if ($(this).hasClass("btn-outline-success")) return;
+
+                $(".status-btn").removeClass("btn-outline-success").addClass("btn-outline-light");
+                $(this).removeClass("btn-outline-light").addClass("btn-outline-success");
+            });
+
+            $("#editNoteBtn").on("click", function () {
+                $("#noteTextarea").val($("#noteText").text() === "Click Edit to add your thoughts on this book..." ? "" : $("#noteText").text());
+                $("#noteTextarea, #saveNoteBtn, #cancelNoteBtn").removeClass("d-none");
+                $("#noteText, #noteTimestamp, #editNoteBtn").addClass("d-none");
+            });
+
+            $("#cancelNoteBtn").on("click", function () {
+                $("#noteText, #editNoteBtn").removeClass("d-none");
+                if ($("#noteTimestamp").text() !== "") $("#noteTimestamp").removeClass("d-none");
+                $("#noteTextarea, #saveNoteBtn, #cancelNoteBtn").addClass("d-none");
+            });
+
+            $("#saveNoteBtn").on("click", function () {
+                const value = $("#noteTextarea").val().trim();
+                $("#noteText").text(value === "" ? "Click Edit to add your thoughts on this book..." : value);
+
+                if (value !== "") {
+                    const formatted = new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+                    $("#noteTimestamp").text("Last edited: " + formatted).removeClass("d-none");
+                }
+
+                $("#noteText, #editNoteBtn").removeClass("d-none");
+                $("#noteTextarea, #saveNoteBtn, #cancelNoteBtn").addClass("d-none");
             });
         });
     </script>
