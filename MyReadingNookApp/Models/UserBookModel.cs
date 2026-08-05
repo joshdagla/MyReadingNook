@@ -9,7 +9,7 @@ namespace MyReadingNookApp.Models
         public int BookId { get; set; }
         public DateTimeOffset AddedAt { get; set; } = DateTimeOffset.UtcNow;
         
-        [MaxLength(250)]
+        [MaxLength(1000)]
         public string? UserNotes { get; set; }
 
         [AllowedValues("Wish to Read", "Currently Reading", "Completed", ErrorMessage = "Invalid Book Status")]

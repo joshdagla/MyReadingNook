@@ -16,4 +16,6 @@ public class BookListModel
     public string ListName { get; set; }
 
     public List<BookModel>? BookItems { get; set; }
+    
+    public UserModel UserModel { get; set; } = null!;
 }

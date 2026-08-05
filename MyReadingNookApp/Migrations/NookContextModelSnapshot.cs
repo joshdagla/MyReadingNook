@@ -35,10 +35,15 @@ namespace MyReadingNookApp.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<int>("UserModelId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ListName")
                         .IsUnique();
+
+                    b.HasIndex("UserModelId");
 
                     b.ToTable("BookLists");
                 });
@@ -117,8 +122,8 @@ namespace MyReadingNookApp.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserNotes")
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
 
                     b.HasKey("UserId", "BookId");
 
@@ -167,6 +172,17 @@ namespace MyReadingNookApp.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("MyReadingNookApp.Models.BookListModel", b =>
+                {
+                    b.HasOne("MyReadingNookApp.Models.UserModel", "UserModel")
+                        .WithMany()
+                        .HasForeignKey("UserModelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserModel");
                 });
 
             modelBuilder.Entity("MyReadingNookApp.Models.BookModel", b =>
