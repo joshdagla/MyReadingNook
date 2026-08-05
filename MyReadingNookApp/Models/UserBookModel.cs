@@ -12,7 +12,7 @@ namespace MyReadingNookApp.Models
         [MaxLength(250)]
         public string? UserNotes { get; set; }
 
-        [AllowedValues("Wish to Read", "Completed", ErrorMessage = "Invalid Book Status")]
+        [AllowedValues("Wish to Read", "Currently Reading", "Completed", ErrorMessage = "Invalid Book Status")]
         public string BookStatus { get; set; } = "Wish to Read";
 
         // Rating given out of 5 stars

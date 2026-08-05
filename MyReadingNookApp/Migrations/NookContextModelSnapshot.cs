@@ -60,8 +60,7 @@ namespace MyReadingNookApp.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ImagePath")
                         .HasMaxLength(300)

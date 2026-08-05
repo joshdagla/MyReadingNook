@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MyReadingNookApp.Dtos.Books;
 using MyReadingNookApp.Models;
-using static MyReadingNookApp.Services.BookSearchService;
 
 namespace MyReadingNookApp.Services;
 
