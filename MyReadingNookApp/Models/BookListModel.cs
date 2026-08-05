@@ -15,7 +15,7 @@ public class BookListModel
     [MaxLength(100)]
     public string ListName { get; set; }
 
-    public List<BookModel>? BookItems { get; set; }
+    public List<BookModel> BookItems { get; set; } = new();
     
     public UserModel UserModel { get; set; } = null!;
 }

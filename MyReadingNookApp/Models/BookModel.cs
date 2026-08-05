@@ -28,7 +28,6 @@ public class BookModel
     [MaxLength(30)]
     public string? Publisher { get; set; }
 
-    // TODO: Fix Max length bug for descriptions
     [Column(TypeName = "TEXT")]
     public string? Description { get; set; }
 
