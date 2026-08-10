@@ -61,6 +61,7 @@ public class BookAddService : IBookAddService
             return new BookAddResult
             {
                 Success = true,
+                BookId = bookExists.Id,
             };
         }
 
@@ -90,6 +91,7 @@ public class BookAddService : IBookAddService
         return new BookAddResult
         {
             Success = true,
+            BookId = await _nookContext.Books.Where(b => b.Isbn == bookAddDto.Isbn).Select(b => b.Id).MaxAsync(),
         };
     }
 }

@@ -134,4 +134,30 @@ public class BookListController : ControllerBase
         var result = await _bookListService.RemoveBookListAsync(userId, bookListId, currentBook);
         return Ok(result);
     }
+
+    // Get all books in a collection
+    [Authorize]
+    [HttpGet("get/{bookListId}")]
+    public async Task<IActionResult> GetAllBooksInList([FromRoute] int bookListId)
+    {
+        int userId = User.GetUserId();
+        
+        var bookListModel = await _nookContext.BookLists
+            .Where(u => u.UserModel.Id == userId && u.Id == bookListId)
+            .FirstOrDefaultAsync();
+
+        if (bookListModel == null)
+        {
+            return NotFound("Book list not found");
+        }       
+        
+        var allBooks = await _nookContext.BookLists.Select(b => b.BookItems).ToListAsync();
+
+        if (bookListModel == null)
+        {
+            return NotFound("No books found in list");
+        }
+        
+        return Ok(allBooks);
+    }
 }

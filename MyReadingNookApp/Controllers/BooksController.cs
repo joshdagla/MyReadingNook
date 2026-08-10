@@ -98,6 +98,7 @@ public class BooksController : ControllerBase
         }
     }
 
+    // Fetch book details
     [Authorize]
     [HttpGet("bookDetail")]
     public async Task<IActionResult> GetBookDetails([FromQuery] string isbn)
@@ -116,13 +117,34 @@ public class BooksController : ControllerBase
         }
         catch (KeyNotFoundException e)
         {
-            Console.WriteLine(e);
-            throw;
+            return StatusCode(500, e.Message);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            throw;
+            return StatusCode(500, e.Message);
+        }
+    }
+
+    // Get book details by Id (book details fetched from DB instead of GoogleAPI)
+    [Authorize]
+    [HttpGet("bookDetail/{bookId}")]
+    public async Task<IActionResult> GetBookDetailById([FromRoute] int bookId)
+    {
+        try
+        {
+            int userId = User.GetUserId();
+            var result = await _bookDetailService.GetBookIdAsync(bookId, userId);
+
+            if (!result.Success)
+            {
+                return BadRequest(result.ErrorMessage);
+            }
+            
+            return Ok(result.Data);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
         }
     }
 }

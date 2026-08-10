@@ -14,6 +14,7 @@ public class BookDetailService : IBookDetailService
         _nookContext = nookContext;
         _bookSearchService = bookSearchService;
     }
+    
     public async Task<BookDetailsResult<BookDetailsResponseDto>> GetBookDetailsAsync(string isbn, int userId)
     {
             bool userExists = await _nookContext.Users.AnyAsync(u => u.Id == userId);
@@ -80,7 +81,7 @@ public class BookDetailService : IBookDetailService
                         Isbn = bookExists.Isbn,
                         IsInCollection = false,
                         Publisher =  bookExists.Publisher,
-                        //TODO: Need to add thumbnail functionality
+                        Thumbnail = bookExists.ImagePath,
                     }
                 };
             }
@@ -97,7 +98,7 @@ public class BookDetailService : IBookDetailService
                     Isbn = bookExists.Isbn,
                     IsInCollection = true,
                     Publisher =  bookExists.Publisher,
-                    //TODO: Need to add thumbnail functionality
+                    Thumbnail = bookExists.ImagePath,
                     UserBookInfo = new UserBookInfoDto
                     {
                         BookRating = userBookExists.BookRating,
@@ -107,5 +108,73 @@ public class BookDetailService : IBookDetailService
                 }
             };
 
+    }
+
+    public async Task<BookDetailsResult<BookDetailsResponseDto>> GetBookIdAsync(int bookId, int userId)
+    {
+        bool userExists = await _nookContext.Users.AnyAsync(u => u.Id == userId);
+
+        // If user does not exist
+        if (!userExists)
+            return new BookDetailsResult<BookDetailsResponseDto>
+            {
+                Success = false,
+                ErrorMessage = "User not found",
+            };
+
+        var bookExists = await _nookContext.Books.FirstOrDefaultAsync(b => b.Id == bookId);
+
+        if (bookExists == null)
+        {
+            return new BookDetailsResult<BookDetailsResponseDto>
+            {
+                Success = false,
+                ErrorMessage = "No book found in database",
+            };
+        }
+        
+        var userBookExists = await _nookContext.UserBooks
+            .FirstOrDefaultAsync(ub => ub.BookId == bookExists.Id && ub.UserId == userId);
+        
+        // If book is in database but current user does not have it in their collection
+        if (userBookExists == null)
+        {
+            return new BookDetailsResult<BookDetailsResponseDto>
+            {
+                Success = true,
+                Data = new BookDetailsResponseDto
+                {
+                    Author = bookExists.Author,
+                    Title = bookExists.Title,
+                    Description = bookExists.Description,
+                    Isbn = bookExists.Isbn,
+                    IsInCollection = false,
+                    Publisher =  bookExists.Publisher,
+                    Thumbnail = bookExists.ImagePath,
+                }
+            };
+        }
+            
+        // If user has it added in their collection
+        return new BookDetailsResult<BookDetailsResponseDto>
+        {
+            Success = true,
+            Data = new BookDetailsResponseDto
+            {
+                Author = bookExists.Author,
+                Title = bookExists.Title,
+                Description = bookExists.Description,
+                Isbn = bookExists.Isbn,
+                IsInCollection = true,
+                Publisher =  bookExists.Publisher,
+                Thumbnail = bookExists.ImagePath,
+                UserBookInfo = new UserBookInfoDto
+                {
+                    BookRating = userBookExists.BookRating,
+                    BookStatus =  userBookExists.BookStatus,
+                    UserNotes =  userBookExists.UserNotes,
+                }
+            }
+        };
     }
 }

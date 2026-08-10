@@ -16,11 +16,12 @@ public class UserBooksController : ControllerBase
 
    public UserBooksController(NookContext nookContext)
    {
-      this._nookContext = nookContext;
+      _nookContext = nookContext;
    }
 
+   // GET endpoint to fetch all books from user's collection
    [Authorize]
-   [HttpGet("all")]
+   [HttpGet("all")] // Route: /api/userbooks/all
    public async Task<IActionResult> FetchAllBooks()
    {
       int userId = User.GetUserId();
@@ -82,4 +83,6 @@ public class UserBooksController : ControllerBase
            return StatusCode(500, "An internal server error has occurred");
        }
    }
+   
+   // Remove book from user's collection
 }

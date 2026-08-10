@@ -26,13 +26,13 @@
     const imagePath = book.thumbnail || "https://via.placeholder.com/40x60?text=No+Image";
 
     const resultHtml = `
-                                            <div class="search-result-item" data-isbn="${book.isbn}">
-                                                <img src="${imagePath}" alt="${book.title}">
-                                                <div>
-                                                    <div><strong>${book.title}</strong></div>
-                                                    <div class="text-muted" style="font-size: 0.85em;">${book.author}</div>
-                                                </div>
-                                            </div>`;
+                <div class="search-result-item" data-isbn="${book.isbn}">
+                    <img src="${imagePath}" alt="${book.title}">
+                    <div>
+                        <div><strong>${book.title}</strong></div>
+                        <div class="text-muted" style="font-size: 0.85em;">${book.author}</div>
+                    </div>
+                </div>`;
     $("#searchResults").append(resultHtml);
 });
 },

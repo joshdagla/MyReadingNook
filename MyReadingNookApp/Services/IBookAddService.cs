@@ -8,6 +8,8 @@ public class BookAddResult
     public bool Success { get; set; }
 
     public string? ErrorMessage { get; set; }
+
+    public int? BookId { get; set; }
 }
 
 public interface IBookAddService
