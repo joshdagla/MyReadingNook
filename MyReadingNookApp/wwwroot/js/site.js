@@ -13,7 +13,7 @@
     $("#searchResults").empty();
     return;
 }
-
+    
     searchTimeout = setTimeout(function () {
     $.ajax({
     url: "/api/Books/search",

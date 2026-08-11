@@ -108,9 +108,6 @@ namespace MyReadingNookApp.Migrations
                     b.Property<DateTimeOffset>("AddedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("BookModelId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("BookRating")
                         .HasColumnType("int");
 
@@ -118,18 +115,13 @@ namespace MyReadingNookApp.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("UserModelId")
-                        .HasColumnType("int");
-
                     b.Property<string>("UserNotes")
                         .HasMaxLength(1000)
                         .HasColumnType("varchar(1000)");
 
                     b.HasKey("UserId", "BookId");
 
-                    b.HasIndex("BookModelId");
-
-                    b.HasIndex("UserModelId");
+                    b.HasIndex("BookId");
 
                     b.ToTable("UserBooks");
                 });
@@ -196,13 +188,13 @@ namespace MyReadingNookApp.Migrations
                 {
                     b.HasOne("MyReadingNookApp.Models.BookModel", "BookModel")
                         .WithMany()
-                        .HasForeignKey("BookModelId")
+                        .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("MyReadingNookApp.Models.UserModel", "UserModel")
                         .WithMany()
-                        .HasForeignKey("UserModelId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
