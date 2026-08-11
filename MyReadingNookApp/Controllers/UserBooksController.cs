@@ -24,28 +24,35 @@ public class UserBooksController : ControllerBase
    [HttpGet("all")] // Route: /api/userbooks/all
    public async Task<IActionResult> FetchAllBooks()
    {
-      int userId = User.GetUserId();
+       try
+       {
+           int userId = User.GetUserId();
 
-      List<AllBooksResponseDto> allUserBooks = await _nookContext.UserBooks
-          .Where(ub => ub.UserId == userId)
-          .Select(ub => new AllBooksResponseDto
-          {
-              BookId = ub.BookModel.Id,
-              Title = ub.BookModel.Title,
-              Author = ub.BookModel.Author,
-              ImagePath = ub.BookModel.ImagePath,
-              BookStatus = ub.BookStatus,
-              BookRating = ub.BookRating
-          })
-          .ToListAsync();
+           List<AllBooksResponseDto> allUserBooks = await _nookContext.UserBooks
+               .Where(ub => ub.UserId == userId)
+               .Select(ub => new AllBooksResponseDto
+               {
+                   BookId = ub.BookModel.Id,
+                   Title = ub.BookModel.Title,
+                   Author = ub.BookModel.Author,
+                   ImagePath = ub.BookModel.ImagePath,
+                   BookStatus = ub.BookStatus,
+                   BookRating = ub.BookRating
+               })
+               .ToListAsync();
       
-      return Ok(allUserBooks);
+           return Ok(allUserBooks);
+       }
+       catch (Exception e)
+       {
+           return StatusCode(500, "An internal server error has occurred");
+       }
    }
 
    // Allows user to update personal book info such as book status, rating and personal notes
    // Book id is received from route
    [Authorize]
-   [HttpPatch("{bookId:int}")] // Route: /api/userbooks/{bookid}
+   [HttpPatch("update/{bookId:int}")] // Route: /api/userbooks/{bookid}
    public async Task<IActionResult> BookInfoUpdate([FromBody] BookInfoDto bookInfoDto, [FromRoute] int bookId)
    {
        try
@@ -74,6 +81,10 @@ public class UserBooksController : ControllerBase
 
            return Ok(userBookId);
        }
+       catch (KeyNotFoundException)
+       {
+           return NotFound($"Book not found in collection");
+       }
        catch (NullReferenceException)
        {
            return StatusCode(500, "An internal server error has occurred");
@@ -85,4 +96,44 @@ public class UserBooksController : ControllerBase
    }
    
    // Remove book from user's collection
+   [Authorize]
+   [HttpDelete("delete/{bookId:int}")]
+   public async Task<IActionResult> DeleteBook([FromRoute] int bookId)
+   {
+       try
+       {
+           int userId = User.GetUserId();
+
+           if (bookId == null)
+           {
+               return NotFound($"Book not found in collection");
+           }
+           
+           var deleteBook = await _nookContext.UserBooks.Where(ub => ub.UserId == userId && ub.BookId == bookId)
+               .FirstOrDefaultAsync();
+
+           if (deleteBook == null)
+           {
+               return NotFound($"Book not found in User's collection");
+           }
+           
+           _nookContext.UserBooks.Remove(deleteBook);
+           
+           await _nookContext.SaveChangesAsync();
+           
+           return Ok($"{deleteBook.BookId} has been deleted from collection");
+       }
+       catch (KeyNotFoundException)
+       {
+           return NotFound($"Book not found in collection");
+       }
+       catch (NullReferenceException)
+       {
+           return StatusCode(500, "An internal server error has occurred");
+       }
+       catch (Exception e)
+       {
+           return StatusCode(500, "An internal server error has occurred");
+       }
+   }
 }

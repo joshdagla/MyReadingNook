@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 namespace MyReadingNookApp.Dtos.Books;
@@ -18,7 +19,7 @@ public class BookAddDto
     [MaxLength(30)]
     public string? Publisher { get; set; }
 
-    [MaxLength(500)]
+    [Column(TypeName = "TEXT")]
     public string? Description { get; set; }
 
     [Unicode(false)] 
