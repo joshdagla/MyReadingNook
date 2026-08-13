@@ -42,6 +42,7 @@
 <div class="d-flex align-items-center justify-content-center mt-4" style="font-family: 'Calisto MT', sans-serif">
     <div class="row">
         <button id="addToCollectionBtn" class="btn btn-success btn-lg">Add to Collection</button>
+        <div id="addSuccess" class="alert alert-primary d-none mt-2" role="alert"></div>
         <div id="addError" class="alert alert-danger d-none mt-2" role="alert"></div>
         
         <div id="bookStatusBtnGrp" class="btn-group d-none" role="group">
@@ -136,38 +137,58 @@
     <script>
         $(document).ready(function () {
             const isbn = new URLSearchParams(window.location.search).get("isbn");
-            let currentBook = null; // Holds fetched book data
+            const bookId = new URLSearchParams(window.location.search).get("bookId");
+
+            let currentBook = null;
+            let fetchUrl;
+            let fetchData;
+
+            if (bookId) {
+                fetchUrl = "/api/Books/bookDetail/" + bookId;
+                fetchData = {};
+            } else {
+                fetchUrl = "/api/Books/bookDetail";
+                fetchData = { isbn: isbn };
+            }
+
             $.ajax({
-                url: "/api/Books/bookDetail",
+                url: fetchUrl,
                 method: "GET",
-                data: {isbn: isbn},
+                data: fetchData,
                 headers: {
-                    Authorization: "Bearer " + sessionStorage.getItem("authToken"),
+                    Authorization: "Bearer " + sessionStorage.getItem("authToken")
                 },
                 success: function (response) {
-                    currentBook = response; // Saving book data in case user wants to add to collection
-                    
+                    currentBook = response;
+
                     $("#bookCover").attr("src", response.thumbnail);
                     $("#bookTitle").text(response.title);
                     $("#bookAuthor").text(response.author);
                     $("#bookPublisher").text(response.publisher);
                     $("#bookDescription").text(response.description);
                     $("#bookIsbn").text(response.isbn);
+
+                    if (response.isInCollection) {
+                        $("#addToCollectionBtn").text("Book Added to Collection").prop("disabled", true).addClass("d-none");
+                        $("#hiddenGrp").removeClass("d-none");
+                        $("#bookStatusBtnGrp").removeClass("d-none");
+                        $("#notesCardSection").removeClass("d-none");
+                    }
                 },
                 error: function (xhr) {
-                    console.log("Failed to load book data", xhr.responseJSON);
+                    console.log("Failed to load book details", xhr.responseJSON);
                 }
             });
-            
+
             $("#addToCollectionBtn").on("click", function () {
                 if (!currentBook) return;
-                
+
                 $.ajax({
                     url: "/api/Books/add",
                     method: "POST",
                     contentType: "application/json",
                     headers: {
-                        Authorization: "Bearer " + sessionStorage.getItem("authToken"),
+                        Authorization: "Bearer " + sessionStorage.getItem("authToken")
                     },
                     data: JSON.stringify({
                         title: currentBook.title,
@@ -175,19 +196,47 @@
                         publisher: currentBook.publisher,
                         description: currentBook.description,
                         isbn: currentBook.isbn,
-                        imagePath: currentBook.thumbnail,
+                        imagePath: currentBook.thumbnail
                     }),
-                    success: function () {
-                        $("#addToCollectionBtn").text("Book Added to Collection").prop("disabled", true).addClass("d-none");
-                        $("hiddenGrp").removeClass("d-none");
-                        $("#bookStatusBtnGrp").removeClass("d-none");
-                        $("#notesCardSection").removeClass("d-none");
+                    success: function (response) {
+                        window.location.href = "/BookData/Details?bookId=" + response.bookId;
+                        $.setTimeout(function () {
+                            $("#addSuccess").removeClass("d-none").text("Book Added to Collection");
+                        }, 2000);
                     },
                     error: function (xhr) {
                         $("#addError").removeClass("d-none").text(xhr.responseJSON?.errorMessage ?? "Failed to add book");
                     }
                 });
             });
+            
+            $("#removeBtn").on("click", function () {
+                if (!currentBook) return;
+                
+                $.ajax({
+                    url:"/api/UserBooks/delete/" + currentBook.id,
+                    method: "DELETE",
+                    contentType: "application/json",
+                    headers: {
+                        Authorization: "Bearer " + sessionStorage.getItem("authToken")
+                    },
+                    data: JSON.stringify({
+                        bookId: currentBook.id,
+                    }),
+                    success: function () {
+                        $.setTimeout(function () {
+                            $("#addToCollectionBtn").text("Book removed from Collection").prop("disabled", false).removeClass("d-none");
+                            $("#hiddenGrp").addClass("d-none");
+                            $("#bookStatusBtnGrp").addClass("d-none");
+                            $("#notesCardSection").addClass("d-none"); 
+                            $("#addSuccess").removeClass("d-none").text("Book removed from Collection");
+                        }, 2000);
+                    },
+                    error: function (xhr) {
+                        $("#addError").removeClass("d-none").text(xhr.responseJSON?.errorMessage ?? "Failed to remove book");
+                    }
+                })
+            })
 
             document.querySelectorAll('.star-rating:not(.readonly) label').forEach(star => {
                 star.addEventListener('click', function() {

@@ -110,18 +110,11 @@ public class UserBooksController : ControllerBase
            }
            
            var deleteBook = await _nookContext.UserBooks.Where(ub => ub.UserId == userId && ub.BookId == bookId)
-               .FirstOrDefaultAsync();
+               .ExecuteDeleteAsync();
 
-           if (deleteBook == null)
-           {
-               return NotFound($"Book not found in User's collection");
-           }
-           
-           _nookContext.UserBooks.Remove(deleteBook);
-           
            await _nookContext.SaveChangesAsync();
            
-           return Ok($"{deleteBook.BookId} has been deleted from collection");
+           return Ok($"Book has been deleted from collection");
        }
        catch (KeyNotFoundException)
        {

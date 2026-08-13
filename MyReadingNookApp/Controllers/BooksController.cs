@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using MyReadingNookApp.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MyReadingNookApp.Dtos.Books;
 using MyReadingNookApp.Extensions;
 using MyReadingNookApp.Models;
@@ -12,18 +13,21 @@ namespace MyReadingNookApp.Controllers;
 [Route("api/[controller]")] // Route: api/books
 public class BooksController : ControllerBase
 {
+    private readonly NookContext _nookContext;
     private readonly BookSearchService _bookService;
     private readonly BookAddService _bookAddService;
     private readonly BookDetailService _bookDetailService;
 
-    public BooksController(BookSearchService bookService, BookAddService bookAddService, BookDetailService bookDetailService)
+    public BooksController(NookContext nookContext,BookSearchService bookService, BookAddService bookAddService, BookDetailService bookDetailService)
     {
+        _nookContext = nookContext;
         _bookService = bookService;
         _bookAddService = bookAddService;
         _bookDetailService = bookDetailService;
     }
     
     // Controller to search and query books from Google books api
+    [Authorize]
     [HttpGet("search")] // Route resolves to: api/books/search
     public async Task<IActionResult> SearchBooks(
         [FromQuery] string? title, 
@@ -41,7 +45,10 @@ public class BooksController : ControllerBase
 
         try
         {
+            int  userId = User.GetUserId();
             var books = await _bookService.SearchBooksAsync(title, author, isbn, maxResults);
+
+            bool InDatabase = false;
 
             if (!books.Any())
             {
@@ -64,6 +71,15 @@ public class BooksController : ControllerBase
                        ?? "",
                 Thumbnail = b.VolumeInfo.ImageLinks?.Thumbnail
             });
+
+            var localBook = await _nookContext.UserBooks.Where(ub => ub.UserId == userId && ub.BookModel.Isbn == isbn)
+                .AnyAsync();
+
+            if (localBook)
+            {
+                InDatabase = true;
+                return Ok(formattedResponse);
+            }
 
             return Ok(formattedResponse);
         }
@@ -125,7 +141,7 @@ public class BooksController : ControllerBase
         }
     }
 
-    // Get book details by Id (book details fetched from DB instead of GoogleAPI)
+    // Get book details by id (book details fetched from DB instead of GoogleAPI)
     [Authorize]
     [HttpGet("bookDetail/{bookId}")]
     public async Task<IActionResult> GetBookDetailById([FromRoute] int bookId)
