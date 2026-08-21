@@ -43,12 +43,13 @@
     <div class="row">
         <button id="addToCollectionBtn" class="btn btn-success btn-lg">Add to Collection</button>
         <div id="addSuccess" class="alert alert-primary d-none mt-2" role="alert"></div>
+        <div id="status-feedback" class="alert alert-secondary d-none mt-2" role="alert"></div>
         <div id="addError" class="alert alert-danger d-none mt-2" role="alert"></div>
         
         <div id="bookStatusBtnGrp" class="btn-group d-none" role="group">
             <button id="wishToReadBtn" class="btn status-btn btn-outline-success active">Wish to Read</button>
-            <button id="currentlyReadingBtn" class="btn status-btn btn-outline-light active">Currently Reading</button>
-            <button id="completedBtn" class="btn status-btn btn-outline-light active">Completed</button>
+            <button id="currentlyReadingBtn" class="btn status-btn btn-light text-dark border">Currently Reading</button>
+            <button id="completedBtn" class="btn status-btn btn-light text-dark border">Completed</button>
         </div>
         
         <div id="notesCardSection" class="notes-card d-none">
@@ -169,7 +170,7 @@
                     $("#bookIsbn").text(response.isbn);
 
                     if (response.isInCollection) {
-                        $("#addToCollectionBtn").text("Book Added to Collection").prop("disabled", true).addClass("d-none");
+                        $("#addToCollectionBtn").prop("disabled", true).addClass("d-none");
                         $("#hiddenGrp").removeClass("d-none");
                         $("#bookStatusBtnGrp").removeClass("d-none");
                         $("#notesCardSection").removeClass("d-none");
@@ -200,9 +201,6 @@
                     }),
                     success: function (response) {
                         window.location.href = "/BookData/Details?bookId=" + response.bookId;
-                        $.setTimeout(function () {
-                            $("#addSuccess").removeClass("d-none").text("Book Added to Collection");
-                        }, 2000);
                     },
                     error: function (xhr) {
                         $("#addError").removeClass("d-none").text(xhr.responseJSON?.errorMessage ?? "Failed to add book");
@@ -214,23 +212,20 @@
                 if (!currentBook) return;
                 
                 $.ajax({
-                    url:"/api/UserBooks/delete/" + currentBook.id,
+                    url:"/api/UserBooks/delete/" + currentBook.bookId,
                     method: "DELETE",
                     contentType: "application/json",
                     headers: {
                         Authorization: "Bearer " + sessionStorage.getItem("authToken")
                     },
                     data: JSON.stringify({
-                        bookId: currentBook.id,
+                        bookId: currentBook.bookId,
                     }),
                     success: function () {
-                        $.setTimeout(function () {
-                            $("#addToCollectionBtn").text("Book removed from Collection").prop("disabled", false).removeClass("d-none");
+                            $("#addToCollectionBtn").prop("disabled", false).removeClass("d-none");
                             $("#hiddenGrp").addClass("d-none");
                             $("#bookStatusBtnGrp").addClass("d-none");
                             $("#notesCardSection").addClass("d-none"); 
-                            $("#addSuccess").removeClass("d-none").text("Book removed from Collection");
-                        }, 2000);
                     },
                     error: function (xhr) {
                         $("#addError").removeClass("d-none").text(xhr.responseJSON?.errorMessage ?? "Failed to remove book");
@@ -247,6 +242,7 @@
                 });
             });
 
+            
             $(".status-btn").on("click", function () {
                 if ($(this).hasClass("btn-outline-success")) return;
 
@@ -278,6 +274,82 @@
                 $("#noteText, #editNoteBtn").removeClass("d-none");
                 $("#noteTextarea, #saveNoteBtn, #cancelNoteBtn").addClass("d-none");
             });
+
+                            function sendPartialUpdate(bookId, payload) {
+                                if (!bookId) {
+                                    console.error('PATCH failed: No valid book ID found.');
+                                    return;
+                                }
+        
+                                $('#status-feedback')
+                                    .removeClass('d-none alert-danger alert-success')
+                                    .addClass('alert-secondary')
+                                    .text('Saving changes...');
+        
+                                $.ajax({
+                                    url: `/api/UserBooks/update/` + bookId,
+                                    type: 'PATCH',
+                                    contentType: 'application/json',
+                                    headers: {
+                                        Authorization: "Bearer " + sessionStorage.getItem("authToken")
+                                    },
+                                    data: JSON.stringify(payload),
+                                    success: function(response) {
+                                        $('#status-feedback')
+                                            .removeClass('alert-secondary')
+                                            .addClass('alert-success')
+                                            .text('Changes saved!');
+        
+                                        setTimeout(() => {
+                                            $('#status-feedback').addClass('d-none');
+                                        }, 2500);
+                                    },
+                                    error: function(xhr) {
+                                        $('#status-feedback')
+                                            .removeClass('alert-secondary')
+                                            .addClass('alert-danger')
+                                            .text('Failed to save changes.');
+                                        console.error('Patch error:', xhr.responseText);
+                                    }
+                                });
+                            }
+        
+                            function getActiveBookId() {
+                                return currentBook?.bookId || new URLSearchParams(window.location.search).get("bookId");
+                            }
+        
+                            $('#starRating input[type="radio"]').on('change', function() {
+                                let ratingValue = parseInt($(this).val(), 10);
+                                sendPartialUpdate(getActiveBookId(), { BookRating: ratingValue });
+                            });
+        
+                            $('#bookStatusBtnGrp .status-btn').on('click', function() {
+                                let clickedId = $(this).attr('id');
+                                let statusText = '';
+        
+                                if (clickedId === 'wishToReadBtn') {
+                                    statusText = 'Wish to Read';
+                                } else if (clickedId === 'currentlyReadingBtn') {
+                                    statusText = 'Currently Reading';
+                                } else if (clickedId === 'completedBtn') {
+                                    statusText = 'Completed';
+                                }
+
+                                $('#bookStatusBtnGrp .status-btn')
+                                    .removeClass('btn-outline-success active btn-outline-light')
+                                    .addClass('btn-light text-dark border');
+
+                                $(this)
+                                    .removeClass('btn-light text-dark')
+                                    .addClass('btn-outline-success active');
+
+                                sendPartialUpdate(getActiveBookId(), { BookStatus: statusText });
+                            });
+        
+                            $('#saveNoteBtn').on('click', function() {
+                                let notesValue = $('#noteTextarea').val().trim();
+                                sendPartialUpdate(getActiveBookId(), { UserNotes: notesValue });
+                            }); 
         });
     </script>
 }

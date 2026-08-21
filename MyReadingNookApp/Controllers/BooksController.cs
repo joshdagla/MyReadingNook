@@ -48,11 +48,9 @@ public class BooksController : ControllerBase
             int  userId = User.GetUserId();
             var books = await _bookService.SearchBooksAsync(title, author, isbn, maxResults);
 
-            bool InDatabase = false;
-
             if (!books.Any())
             {
-                return NotFound(new { message = "No books found matching your criteria." });
+                return BadRequest(new { message = "No books found matching your criteria." });
             }
 
             var formattedResponse = books
@@ -69,17 +67,8 @@ public class BooksController : ControllerBase
                 Isbn = b.VolumeInfo.IndustryIdentifiers?.FirstOrDefault(i => i.Type == "ISBN_13")?.Identifier
                        ?? b.VolumeInfo.IndustryIdentifiers?.FirstOrDefault(i => i.Type == "ISBN_10")?.Identifier
                        ?? "",
-                Thumbnail = b.VolumeInfo.ImageLinks?.Thumbnail
+                Thumbnail = b.VolumeInfo.ImageLinks?.Thumbnail,
             });
-
-            var localBook = await _nookContext.UserBooks.Where(ub => ub.UserId == userId && ub.BookModel.Isbn == isbn)
-                .AnyAsync();
-
-            if (localBook)
-            {
-                InDatabase = true;
-                return Ok(formattedResponse);
-            }
 
             return Ok(formattedResponse);
         }

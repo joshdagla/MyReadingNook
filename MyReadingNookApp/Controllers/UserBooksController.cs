@@ -52,7 +52,7 @@ public class UserBooksController : ControllerBase
    // Allows user to update personal book info such as book status, rating and personal notes
    // Book id is received from route
    [Authorize]
-   [HttpPatch("update/{bookId:int}")] // Route: /api/userbooks/{bookid}
+   [HttpPatch("update/{bookId:int}")] // Route: /api/userbooks/update/{bookid}
    public async Task<IActionResult> BookInfoUpdate([FromBody] BookInfoDto bookInfoDto, [FromRoute] int bookId)
    {
        try
@@ -61,7 +61,7 @@ public class UserBooksController : ControllerBase
 
            if (bookId == null)
            {
-               return NotFound($"Book not found in collection");
+               return BadRequest($"Book not found in collection");
            }
 
            // Check if user has book in the collection
@@ -70,7 +70,7 @@ public class UserBooksController : ControllerBase
 
            if (userBookId == null)
            {
-               return NotFound($"Book not found in User's collection");
+               return BadRequest($"Book not found in User's collection");
            }
 
            if (bookInfoDto.BookRating != null) userBookId.BookRating = bookInfoDto.BookRating;
@@ -83,7 +83,7 @@ public class UserBooksController : ControllerBase
        }
        catch (KeyNotFoundException)
        {
-           return NotFound($"Book not found in collection");
+           return BadRequest($"Book not found in collection");
        }
        catch (NullReferenceException)
        {
@@ -104,29 +104,52 @@ public class UserBooksController : ControllerBase
        {
            int userId = User.GetUserId();
 
-           if (bookId == null)
-           {
-               return NotFound($"Book not found in collection");
-           }
-           
            var deleteBook = await _nookContext.UserBooks.Where(ub => ub.UserId == userId && ub.BookId == bookId)
                .ExecuteDeleteAsync();
 
-           await _nookContext.SaveChangesAsync();
-           
            return Ok($"Book has been deleted from collection");
        }
        catch (KeyNotFoundException)
        {
-           return NotFound($"Book not found in collection");
+           return BadRequest($"Book not found in collection");
        }
        catch (NullReferenceException)
        {
            return StatusCode(500, "An internal server error has occurred");
        }
-       catch (Exception e)
+       catch (Exception)
        {
            return StatusCode(500, "An internal server error has occurred");
+       }
+   }
+
+   [Authorize]
+   [HttpGet("getInfo/{bookId:int}")]
+   public async Task<IActionResult> DisplayBookInfo([FromRoute] int bookId)
+   {
+       try
+       {
+           int userId = User.GetUserId();
+
+           var userBookInfo = await _nookContext.UserBooks.Where(ub => ub.UserId == userId && ub.BookId == bookId)
+               .Select(ub => new BookInfoDto
+               {
+                   BookRating = ub.BookRating,
+                   BookStatus = ub.BookStatus,
+                   UserNote = ub.UserNotes,
+               })
+               .FirstOrDefaultAsync();
+
+           if (userBookInfo == null)
+           {
+               return BadRequest($"No feedback found for this book");
+           }
+
+           return Ok(userBookInfo);
+       }
+       catch (Exception)
+       {
+           return StatusCode(500, "An internal server error has occured");
        }
    }
 }

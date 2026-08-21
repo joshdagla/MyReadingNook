@@ -65,7 +65,7 @@ public class BookListController : ControllerBase
 
         if (bookListModel == null)
         {
-            return NotFound("Book list not found");
+            return BadRequest("Book list not found");
         }
 
         bookListModel.ListName = updatedListName;
@@ -89,7 +89,7 @@ public class BookListController : ControllerBase
 
         if (bookListModel == null)
         {
-            return NotFound("Book list not found");
+            return BadRequest("Book list not found");
         }
 
         _nookContext.BookLists.Remove(bookListModel);
@@ -110,7 +110,7 @@ public class BookListController : ControllerBase
 
         if (currentBook == null)
         {
-            return NotFound("Book not found");
+            return BadRequest("Book not found");
         }
         
         var result = await _bookListService.AddBookListAsync(userId, bookListId, currentBook);
@@ -128,7 +128,7 @@ public class BookListController : ControllerBase
 
         if (currentBook == null)
         {
-            return NotFound("Book not found");
+            return BadRequest("Book not found");
         }
         
         var result = await _bookListService.RemoveBookListAsync(userId, bookListId, currentBook);
@@ -148,14 +148,14 @@ public class BookListController : ControllerBase
 
         if (bookListModel == null)
         {
-            return NotFound("Book list not found");
+            return BadRequest("Book list not found");
         }       
         
         var allBooks = await _nookContext.BookLists.Select(b => b.BookItems).ToListAsync();
 
         if (bookListModel == null)
         {
-            return NotFound("No books found in list");
+            return BadRequest("No books found in list");
         }
         
         return Ok(allBooks);

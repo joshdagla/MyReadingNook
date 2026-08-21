@@ -2,6 +2,13 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
+    const isLoginPage = window.location.pathname.includes("/Account/Login")
+    // Check if auth token exists
+    if (!sessionStorage.getItem('authToken') && !isLoginPage) {
+        // Redirect to login page
+        window.location.href = "/Account/Login";
+    }
+    
     $(document).ready(function () {
     let searchTimeout;
 
@@ -19,6 +26,9 @@
     url: "/api/Books/search",
     method: "GET",
     data: { title: query },
+        headers: {
+        Authorization: "Bearer " +  sessionStorage.getItem("authToken")
+        },
     success: function (response) {
     $("#searchResults").empty();
 
@@ -53,4 +63,11 @@
     const isbn = $(this).data("isbn");
     window.location.href = "/BookData/Details?isbn=" + encodeURIComponent(isbn);
 });
+    $("#logoutBtn").on("click", function (e) {
+        e.preventDefault();
+        
+        sessionStorage.removeItem("authToken");
+        
+        window.location.href = "/Account/Login";
+    })
 });

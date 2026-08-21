@@ -3,4 +3,64 @@
 }
 <h1>@ViewData["Title"]</h1>
 
-<p>My Books Collection</p>
+<div class="container my-4">
+    <!-- Updated grid layout to row-cols-lg-6 for 6 books per row -->
+    <div id="book-grid" class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3"></div>
+</div>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: "/api/UserBooks/all",
+                type: "GET",
+                dataType: "json",
+                headers: {
+                    authorization: "Bearer " + sessionStorage.getItem("authToken"),
+                },
+                success: function (books) {
+                    var $grid = $("#book-grid");
+                    $grid.empty();
+                    
+                    $.each(books, function (index, book) {
+                        let ratingStars = book.bookRating ? '⭐ '.repeat(book.bookRating) : 'Not Rated';
+                        
+                        let statusBadgeColor = 'bg-secondary';
+                        if (book.bookStatus === 'Completed') statusBadgeColor = 'bg-success';
+                        if (book.bookStatus === 'Reading') statusBadgeColor = 'bg-primary';
+
+                        var bookCard = `
+                            <div class="col" data-id="${book.bookId}">
+                            <a href="/BookData/Details?bookId=${book.bookId}" class="text-decoration-none text-dark h-100 d-block">
+                                <div class="card h-100 shadow-sm card-hover">
+                                    ${book.imagePath ? `
+                                        <img src="${book.imagePath}" class="card-img-top bg-light p-1" alt="${book.title} cover" style="height: 180px; object-fit: contain;">
+                                    ` : `
+                                        <div class="bg-light text-muted d-flex align-items-center justify-content-center" style="height: 180px;">No Cover</div>
+                                    `}
+                                    <div class="card-body p-2 d-flex flex-column">
+                                        <h6 class="card-title fw-bold mb-1 text-truncate" title="${book.title}">${book.title}</h6>
+                                        <small class="card-subtitle mb-2 text-muted text-truncate">By ${book.author}</small>
+                                        
+                                        <div class="mt-auto d-flex flex-column gap-1 align-items-start">
+                                            <span class="badge ${statusBadgeColor}">${book.bookStatus || 'Unknown'}</span>
+                                            <small class="text-warning">${ratingStars}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>                    
+                        `;
+                        
+                        $grid.append(bookCard);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Failed to load books:", error);
+                    $("#book-grid").html('<div class="col-12 text-center text-danger">Failed to load books. Please try again later.</div>');
+                }
+            });
+        });
+    </script>
+}

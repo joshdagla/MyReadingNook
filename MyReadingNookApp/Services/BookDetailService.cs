@@ -46,6 +46,7 @@ public class BookDetailService : IBookDetailService
                 
                 var googleBook =  googleResults.First();
                 
+                // Book found in books API
                 return new BookDetailsResult<BookDetailsResponseDto>
                 {
                     Success = true,
@@ -75,6 +76,7 @@ public class BookDetailService : IBookDetailService
                     Success = true,
                     Data = new BookDetailsResponseDto
                     {
+                        BookId = bookExists.Id,
                         Author = bookExists.Author,
                         Title = bookExists.Title,
                         Description = bookExists.Description,
@@ -92,6 +94,7 @@ public class BookDetailService : IBookDetailService
                 Success = true,
                 Data = new BookDetailsResponseDto
                 {
+                    BookId =  bookExists.Id,
                     Author = bookExists.Author,
                     Title = bookExists.Title,
                     Description = bookExists.Description,
@@ -144,6 +147,7 @@ public class BookDetailService : IBookDetailService
                 Success = true,
                 Data = new BookDetailsResponseDto
                 {
+                    BookId =  bookExists.Id,
                     Author = bookExists.Author,
                     Title = bookExists.Title,
                     Description = bookExists.Description,
@@ -161,6 +165,7 @@ public class BookDetailService : IBookDetailService
             Success = true,
             Data = new BookDetailsResponseDto
             {
+                BookId =  bookExists.Id,
                 Author = bookExists.Author,
                 Title = bookExists.Title,
                 Description = bookExists.Description,
