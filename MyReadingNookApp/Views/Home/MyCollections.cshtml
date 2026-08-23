@@ -1,0 +1,75 @@
+@{
+    Layout = "_Layout";
+}
+
+<div class="container d-flex justify-content-between align-items-center">
+    <h2 style="font-family: 'Calisto MT', sans-serif" class="m-0">My Collections</h2>
+    <div class="add-button">
+        <button id="addCollectionBtn" type="button" class="add-button btn fs-5 d-inline-flex align-items-center">
+            <i class="bi bi-plus-square me-2"></i> Add Collection
+        </button>
+    </div>
+</div>
+<div style="font-family: 'Calisto MT', sans-serif" id="collectionInputGrp" class="d-none form-outline container d-flex justify-content-between align-items-baseline">
+    <div data-mdb-input-init class="form-outline mt-3 w-50">
+        <input class="form-control" id="collectionName" rows="1" placeholder="Name of Collection">
+        <div class="alert alert-success my-2 d-none" id="collectionSuccess" role="alert" style="padding: 0.25rem 0.5rem; display: inline-block;"></div>
+        <div class="alert alert-danger my-2 d-none" id="collectionFail" role="alert" style="padding: 0.25rem 0.5rem; display: inline-block;"></div>
+        <div id="collectionBtnGrp" class="btn-group-sm mt-2">
+            <button id="collectionSubmitBtn" type="button" class="btn btn-dark fs-6 d-inline-flex align-items-center">
+                Submit
+            </button>
+            <button id="cancelBtn" type="button" class="btn btn-secondary fs-6 d-inline-flex align-items-center">
+                Cancel
+            </button>
+        </div>
+    </div>
+    </div>
+
+<style>
+    .add-button {
+        border-radius: 6px;
+        border: none;
+        box-shadow: 0 0 0 0.5px black;
+        font-family: 'Calisto MT', sans-serif !important;
+    }
+</style>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            $("#addCollectionBtn").on("click", function (event) {
+                $("#collectionInputGrp").removeClass("d-none");
+            });
+            $("#cancelBtn").on("click", function (event) {
+                $("#collectionInputGrp").addClass("d-none");
+            });
+            
+            $("#collectionSubmitBtn").on("click", function (event) {
+                $.ajax({
+                    url: "/api/BookList/new",
+                    type: "POST",
+                    dataType: "application/json",
+                    headers: {
+                        Authorization: "Bearer " + sessionStorage.getItem("authToken"),
+                    },
+                    data: {
+                        name: $("#collectionName").val(),
+                    },
+                    success: function (data) {
+                        $("#collectionSuccess").removeClass("d-none").text(`Successfully created collection ${data.name}`);
+                        window.location.reload();
+                    },
+                    error: function (response) {
+                        $("#collectionFail").removeClass("d-none").text(`Error creating collection. ${response}`);
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 3000);
+                    }
+                });
+            });
+        })
+    </script>
+}
+
