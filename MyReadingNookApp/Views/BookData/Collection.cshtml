@@ -91,6 +91,55 @@
         line-height: 1.1;
         max-width: 100%;
     }
+
+    .library-card {
+        background-color: #faf6ee;
+        border: 1px solid #c7b790;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: transform 0.18s ease-in-out, border-color 0.18s ease-in-out, box-shadow 0.18s ease-in-out;
+    }
+
+    .library-card:hover {
+        transform: translateY(-5px);
+        border-color: #b9a677;
+        box-shadow: 0 8px 18px rgba(77, 72, 53, 0.18);
+    }
+
+    .book-cover-wrap {
+        background-color: #e0d5b9;
+        padding: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .book-cover-img {
+        height: 200px;
+        object-fit: contain;
+        box-shadow: 0 4px 10px rgba(77, 72, 53, 0.3);
+        border-radius: 2px;
+    }
+
+    .book-title {
+        font-family: 'Calisto MT', serif;
+        font-weight: 700;
+        color: #4d4835;
+        margin-bottom: 4px;
+    }
+
+    .title-underline {
+        width: 32px;
+        height: 2px;
+        background-color: #b9a677;
+        margin-bottom: 6px;
+    }
+
+    .book-author {
+        font-family: 'Calisto MT', serif;
+        color: #8a8168;
+        margin-bottom: 0;
+    }
 </style>
 
 @section Scripts
@@ -130,10 +179,9 @@
                 }
             });
 
-            // Delegated click handler for + Add buttons
             $(document).on("click", ".add-to-list-btn", function (event) {
                 event.preventDefault();
-                event.stopPropagation(); // Keeps dropdown open
+                event.stopPropagation();
 
                 const $btn = $(this);
                 const addedBookId = $btn.data("bookId") || $btn.data("book-id");
@@ -157,7 +205,6 @@
             });
         });
 
-        // Load page details & collection books
         function loadCollectionDetails(bookListId) {
             $.ajax({
                 url: "/api/BookList/get/" + bookListId,
@@ -185,15 +232,21 @@
 
                     $.each(data.books, function (index, book) {
                         const bookCard = `
-                        <div class="col">
-                            <div class="card h-100 shadow-sm">
-                                <img src="${book.imagePath || '/images/no-cover.png'}" class="card-img-top p-2" style="height:220px; object-fit:contain;" alt="${book.title}">
-                                <div class="card-body">
-                                    <h6 class="card-title fw-bold text-truncate">${book.title}</h6>
-                                    <p class="card-text small text-muted">${book.author}</p>
+                            <div class="col">
+                                <div id="bookCardDisplay" class="card h-100 library-card">
+                                    <div class="book-cover-wrap">
+                                        <a href="/BookData/Details?bookId=${book.bookId}">
+                                            <img src="${book.imagePath || '/images/no-cover.png'}" class="book-cover-img" alt="${book.title}">
+                                        </a>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="book-title text-truncate">${book.title}</h6>
+                                        <div class="title-underline"></div>
+                                        <p class="book-author small text-truncate">${book.author}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>`;
+                            </div>`;
+                        
                         $grid.append(bookCard);
                     });
                 },

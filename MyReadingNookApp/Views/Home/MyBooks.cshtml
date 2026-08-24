@@ -2,9 +2,49 @@
 }
 
 <div class="container my-4">
-    <h1 style="font-family: 'Calisto MT', sans-serif" class="m-0 mb-4">My Book Collection</h1>
+    <h1 style="font-family: 'Calisto MT', sans-serif" class="fw-medium m-0 mb-4">My Books</h1>
     <div id="book-grid" class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3"></div>
 </div>
+
+<style>
+    .card-hover {
+        background-color: #faf6ee;
+        border: 1px solid #c7b790;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: transform 0.18s ease-in-out, border-color 0.18s ease-in-out, box-shadow 0.18s ease-in-out;
+    }
+
+    .card-hover:hover {
+        transform: translateY(-4px);
+        border-color: #b9a677;
+        box-shadow: 0 8px 18px rgba(77, 72, 53, 0.18);
+    }
+
+    .card-hover .card-img-top {
+        background-color: #e0d5b9 !important;
+    }
+
+    .card-hover .card-title {
+        font-family: 'Calisto MT', serif;
+        color: #4d4835;
+    }
+
+    .card-hover .card-subtitle {
+        font-family: 'Calisto MT', serif;
+        color: #8a8168 !important;
+    }
+
+    .badge-wish {
+        background-color: #c7b790;
+        color: #4d4835;
+    }
+
+    .badge-completed {
+        background-color: #4d4835;
+        color: #faf6ee;
+    }
+</style>
 
 @section Scripts
 {
@@ -29,26 +69,26 @@
                         if (book.bookStatus === 'Reading') statusBadgeColor = 'bg-primary';
 
                         var bookCard = `
-                            <div class="col" data-id="${book.bookId}">
-                            <a href="/BookData/Details?bookId=${book.bookId}" class="text-decoration-none text-dark h-100 d-block">
-                                <div class="card h-100 shadow-sm card-hover">
-                                    ${book.imagePath ? `
-                                        <img src="${book.imagePath}" class="card-img-top bg-light p-1" alt="${book.title} cover" style="height: 180px; object-fit: contain;">
-                                    ` : `
-                                        <div class="bg-light text-muted d-flex align-items-center justify-content-center" style="height: 180px;">No Cover</div>
-                                    `}
-                                    <div class="card-body p-2 d-flex flex-column">
-                                        <h6 class="card-title fw-bold mb-1 text-truncate" title="${book.title}">${book.title}</h6>
-                                        <small class="card-subtitle mb-2 text-muted text-truncate">By ${book.author}</small>
-                                        
-                                        <div class="mt-auto d-flex flex-column gap-1 align-items-start">
-                                            <span class="badge ${statusBadgeColor}">${book.bookStatus || 'Unknown'}</span>
-                                            <small class="text-warning">${ratingStars}</small>
+                                <div class="col" data-id="${book.bookId}">
+                                    <a href="/BookData/Details?bookId=${book.bookId}" class="text-decoration-none text-dark h-100 d-block">
+                                        <div class="card h-100 card-hover">
+                                            ${book.imagePath ? `
+                                                <img src="${book.imagePath}" class="card-img-top p-2" alt="${book.title} cover" style="height: 180px; object-fit: contain;">
+                                            ` : `
+                                                <div class="d-flex align-items-center justify-content-center" style="height: 180px; background-color: #e0d5b9; color: #8a8168;">No Cover</div>
+                                            `}
+                                            <div class="card-body p-2 d-flex flex-column">
+                                                <h6 class="card-title fw-bold mb-1 text-truncate" title="${book.title}">${book.title}</h6>
+                                                <small class="card-subtitle mb-2 text-truncate">By ${book.author}</small>
+                                
+                                                <div class="mt-auto d-flex flex-column gap-1 align-items-start">
+                                                    <span class="badge ${book.bookStatus === 'Completed' ? 'badge-completed' : 'badge-wish'}">${book.bookStatus || 'Unknown'}</span>
+                                                    <small style="color: #b9a677;">${ratingStars}</small>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>                    
+                                    </a>
+                                </div>                
                         `;
                         
                         $grid.append(bookCard);

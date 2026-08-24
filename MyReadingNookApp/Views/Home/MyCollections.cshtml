@@ -17,27 +17,70 @@
     </div>
 
     <div style="font-family: 'Calisto MT', sans-serif" id="collectionInputGrp" class="d-none mb-4">
-        <div class="card border-0 shadow-sm p-3" style="max-width: 500px;">
+        <div class="card create-collection-card shadow-sm p-3" style="max-width: 500px;">
             <input class="form-control mb-2" id="collectionName" placeholder="Name of Collection">
             <input class="form-control mb-2" id="collectionDescription" placeholder="Description (Optional)">
             <div class="alert alert-success my-1 d-none" id="collectionSuccess" role="alert" style="padding: 0.25rem 0.5rem;"></div>
             <div class="alert alert-danger my-1 d-none" id="collectionFail" role="alert" style="padding: 0.25rem 0.5rem;"></div>
-            <div id="collectionBtnGrp" class="btn-group-sm mt-1">
-                <button id="collectionSubmitBtn" type="button" class="btn btn-dark btn-sm">Submit</button>
-                <button id="cancelBtn" type="button" class="btn btn-secondary btn-sm">Cancel</button>
+            <div id="collectionBtnGrp" class="btn-group-sm mt-1 d-flex gap-2">
+                <button id="collectionSubmitBtn" type="button" class="btn btn-library-primary btn-sm">Submit</button>
+                <button id="cancelBtn" type="button" class="btn btn-library-secondary btn-sm">Cancel</button>
             </div>
         </div>
     </div>
 
     <div id="collectionsGrid" class="row g-4"></div>
-</div><style>
-    .add-button {
-        border-radius: 6px;
-        border: none;
-        box-shadow: 0 0 0 0.5px black;
-        font-family: 'Calisto MT', sans-serif !important;
+</div>
+
+<style>
+    .create-collection-card {
+        background-color: #faf6ee;
+        border: 1px solid #c7b790 !important;
+        border-radius: 10px;
     }
 
+    .create-collection-card input.form-control {
+        font-family: 'Calisto MT', serif;
+        background-color: #fff;
+        border: 1px solid #d9cfb0;
+        color: #4d4835;
+        border-radius: 6px;
+    }
+
+    .create-collection-card input.form-control::placeholder {
+        color: #b0a68c;
+    }
+
+    .create-collection-card input.form-control:focus {
+        border-color: #b9a677;
+        box-shadow: 0 0 0 0.2rem rgba(185, 166, 119, 0.25);
+    }
+
+    .btn-library-primary {
+        background-color: #4d4835;
+        border-color: #4d4835;
+        color: #faf6ee;
+        font-family: 'Calisto MT', serif;
+    }
+
+    .btn-library-primary:hover {
+        background-color: #3a3626;
+        border-color: #3a3626;
+        color: #faf6ee;
+    }
+
+    .btn-library-secondary {
+        background-color: transparent;
+        border-color: #c7b790;
+        color: #4d4835;
+        font-family: 'Calisto MT', serif;
+    }
+
+    .btn-library-secondary:hover {
+        background-color: #e0d5b9;
+        border-color: #c7b790;
+        color: #4d4835;
+    }
     .collection-card {
         border-radius: 12px;
         border: none;
@@ -70,17 +113,19 @@
 
     .book-strip {
         display: flex;
-        gap: 8px;
+        gap: 10px;
         overflow-x: auto;
-        padding: 0.75rem 1.25rem 1.25rem;
+        background-color: #e0d5b9;
+        padding: 1rem 1.25rem;
+        margin-top: 0.75rem;
     }
 
     .book-strip img {
-        width: 60px;
-        height: 90px;
+        width: 75px;
+        height: 112px;
         object-fit: cover;
-        border-radius: 4px;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+        box-shadow: 0 3px 8px rgba(77, 72, 53, 0.3);
         flex-shrink: 0;
     }
 
@@ -90,6 +135,66 @@
         font-style: italic;
         padding: 0 1.25rem 1.25rem;
     }
+
+    .collection-card {
+        background-color: #faf6ee;
+        border: 1px solid #c7b790;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: transform 0.18s ease-in-out, border-color 0.18s ease-in-out, box-shadow 0.18s ease-in-out;
+    }
+
+    .collection-card:hover {
+        transform: translateY(-4px);
+        border-color: #b9a677;
+        box-shadow: 0 8px 18px rgba(77, 72, 53, 0.18);
+    }
+
+    .collection-card-body {
+        padding: 1rem 1.25rem 0.5rem;
+    }
+
+    .collection-card-body h5 {
+        font-family: 'Calisto MT', serif;
+        font-weight: 700;
+        color: #4d4835;
+        margin-bottom: 4px;
+    }
+
+    .collection-date {
+        font-family: 'Calisto MT', serif;
+        font-size: 0.85rem;
+        color: #8a8168;
+    }
+
+    .book-strip {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        background-color: #e0d5b9;
+        padding: 0.85rem 1.25rem;
+        margin-top: 0.75rem;
+    }
+
+    .book-strip img {
+        width: 85px;
+        height: 134px;
+        object-fit: cover;
+        border-radius: 3px;
+        box-shadow: 0 3px 8px rgba(77, 72, 53, 0.3);
+        flex-shrink: 0;
+    }
+
+    .empty-shelf-msg {
+        font-family: 'Calisto MT', serif;
+        font-size: 0.85rem;
+        color: #b0a68c;
+        font-style: italic;
+        background-color: #e0d5b9;
+        padding: 0.85rem 1.25rem;
+        margin-top: 0.75rem;
+    }
+
 </style>
 
 @section Scripts
@@ -140,8 +245,8 @@
                                         <div class="collection-date">Created ${dateFormatted}</div>
                                     </div>
                                     ${collection.bookCovers && collection.bookCovers.length > 0
-                                        ? `<div class="book-strip">${bookCoversHtml}</div>`
-                                        : `<div class="empty-shelf-msg">No books added yet</div>`}
+                                                    ? `<div class="book-strip">${bookCoversHtml}</div>`
+                                                    : `<div class="empty-shelf-msg">No books added yet</div>`}
                                 </div>
                             </div>
                         `;
