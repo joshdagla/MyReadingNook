@@ -1,6 +1,6 @@
 namespace MyReadingNookApp.Dtos.BookList;
 
-public class BookListFormat
+public class GetBookListDto
 {
     public int Id { get; set; }
     
@@ -8,5 +8,5 @@ public class BookListFormat
 
     public DateOnly CreatedAt { get; set; }
 
-    public string? BookCovers { get; set; }
+    public List<string> BookCovers { get; set; } = new List<string>();
 }

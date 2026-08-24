@@ -23,6 +23,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<BookSearchService>();
 builder.Services.AddScoped<BookAddService>();
 builder.Services.AddScoped<BookDetailService>();
+builder.Services.AddScoped<BookListService>();
 
 builder.Services.AddAuthentication(options =>
     {

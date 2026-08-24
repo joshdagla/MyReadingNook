@@ -241,13 +241,129 @@
                     }, 200);
                 });
             });
-
             
-            $(".status-btn").on("click", function () {
+            function getActiveBookId() {
+                return currentBook?.bookId || new URLSearchParams(window.location.search).get("bookId");
+            }
+
+            function sendPartialUpdate(bookId, payload) {
+                if (!bookId) {
+                    console.error('PATCH failed: No valid book ID found.');
+                    return;
+                }
+
+                $('#status-feedback')
+                    .removeClass('d-none alert-danger alert-success')
+                    .addClass('alert-secondary')
+                    .text('Saving changes...');
+
+                $.ajax({
+                    url: `/api/UserBooks/update/` + bookId,
+                    type: 'PATCH',
+                    contentType: 'application/json',
+                    headers: {
+                        Authorization: "Bearer " + sessionStorage.getItem("authToken")
+                    },
+                    data: JSON.stringify(payload),
+                    success: function (response) {
+                        $('#status-feedback')
+                            .removeClass('alert-secondary')
+                            .addClass('alert-success')
+                            .text('Changes saved!');
+
+                        setTimeout(() => {
+                            $('#status-feedback').addClass('d-none');
+                        }, 2500);
+                    },
+                    error: function (xhr) {
+                        $('#status-feedback')
+                            .removeClass('alert-secondary')
+                            .addClass('alert-danger')
+                            .text('Failed to save changes.');
+                        console.error('Patch error:', xhr.responseText);
+                    }
+                });
+            }
+
+            const activeBookId = getActiveBookId();
+            if (activeBookId) {
+                $.ajax({
+                    url: "/api/UserBooks/getInfo/" + activeBookId,
+                    method: "GET",
+                    headers: {
+                        Authorization: "Bearer " + sessionStorage.getItem("authToken")
+                    },
+                    dataType: "json",
+                    success: function (response) {
+                        // 1. Populate Star Rating
+                        if (response.bookRating) {
+                            $(`#starRating input[value="${response.bookRating}"]`).prop('checked', true);
+                        }
+
+                        // 2. Populate Status Buttons
+                        if (response.bookStatus) {
+                            $('#bookStatusBtnGrp .status-btn')
+                                .removeClass('btn-outline-success active')
+                                .addClass('btn-light text-dark border');
+
+                            $('#bookStatusBtnGrp .status-btn').filter(function () {
+                                return $(this).text().trim().toLowerCase() === response.bookStatus.toLowerCase();
+                            }).removeClass('btn-light text-dark').addClass('btn-outline-success active');
+                        }
+
+                        // 3. Populate Note Text & Handle Placeholder State
+                        if (response.userNote && response.userNote.trim() !== "") {
+                            // Set saved note content
+                            $('#noteText').text(response.userNote);
+                            $('#noteTextarea').val(response.userNote);
+
+                            const formattedDate = response.lastEdited
+                                ? new Date(response.lastEdited).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+                                : new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+
+                            $('#noteTimestamp').text("Last edited: " + formattedDate).removeClass('d-none');
+                        } else {
+                            // Display default placeholder text
+                            $('#noteText').text("Click Edit to add your thoughts on this book...");
+                            $('#noteTextarea').val("");
+                            $('#noteTimestamp').addClass('d-none');
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error("Failed to fetch user book feedback:", xhr.responseText);
+                    }
+                });
+            }
+
+
+            $('#starRating input[type="radio"]').on('change', function () {
+                let ratingValue = parseInt($(this).val(), 10);
+                sendPartialUpdate(getActiveBookId(), { BookRating: ratingValue });
+            });
+
+            $('#bookStatusBtnGrp .status-btn').on('click', function () {
                 if ($(this).hasClass("btn-outline-success")) return;
 
-                $(".status-btn").removeClass("btn-outline-success").addClass("btn-outline-light");
-                $(this).removeClass("btn-outline-light").addClass("btn-outline-success");
+                let clickedId = $(this).attr('id');
+                let statusText = '';
+
+                if (clickedId === 'wishToReadBtn') {
+                    statusText = 'Wish to Read';
+                } else if (clickedId === 'currentlyReadingBtn') {
+                    statusText = 'Currently Reading';
+                } else if (clickedId === 'completedBtn') {
+                    statusText = 'Completed';
+                }
+
+                $('#bookStatusBtnGrp .status-btn')
+                    .removeClass('btn-outline-success active')
+                    .addClass('btn-light text-dark border');
+
+                $(this)
+                    .removeClass('btn-light text-dark')
+                    .addClass('btn-outline-success active');
+
+                sendPartialUpdate(getActiveBookId(), { BookStatus: statusText });
             });
 
             $("#editNoteBtn").on("click", function () {
@@ -273,83 +389,9 @@
 
                 $("#noteText, #editNoteBtn").removeClass("d-none");
                 $("#noteTextarea, #saveNoteBtn, #cancelNoteBtn").addClass("d-none");
+
+                sendPartialUpdate(getActiveBookId(), { UserNote: value });
             });
-
-                            function sendPartialUpdate(bookId, payload) {
-                                if (!bookId) {
-                                    console.error('PATCH failed: No valid book ID found.');
-                                    return;
-                                }
-        
-                                $('#status-feedback')
-                                    .removeClass('d-none alert-danger alert-success')
-                                    .addClass('alert-secondary')
-                                    .text('Saving changes...');
-        
-                                $.ajax({
-                                    url: `/api/UserBooks/update/` + bookId,
-                                    type: 'PATCH',
-                                    contentType: 'application/json',
-                                    headers: {
-                                        Authorization: "Bearer " + sessionStorage.getItem("authToken")
-                                    },
-                                    data: JSON.stringify(payload),
-                                    success: function(response) {
-                                        $('#status-feedback')
-                                            .removeClass('alert-secondary')
-                                            .addClass('alert-success')
-                                            .text('Changes saved!');
-        
-                                        setTimeout(() => {
-                                            $('#status-feedback').addClass('d-none');
-                                        }, 2500);
-                                    },
-                                    error: function(xhr) {
-                                        $('#status-feedback')
-                                            .removeClass('alert-secondary')
-                                            .addClass('alert-danger')
-                                            .text('Failed to save changes.');
-                                        console.error('Patch error:', xhr.responseText);
-                                    }
-                                });
-                            }
-        
-                            function getActiveBookId() {
-                                return currentBook?.bookId || new URLSearchParams(window.location.search).get("bookId");
-                            }
-        
-                            $('#starRating input[type="radio"]').on('change', function() {
-                                let ratingValue = parseInt($(this).val(), 10);
-                                sendPartialUpdate(getActiveBookId(), { BookRating: ratingValue });
-                            });
-        
-                            $('#bookStatusBtnGrp .status-btn').on('click', function() {
-                                let clickedId = $(this).attr('id');
-                                let statusText = '';
-        
-                                if (clickedId === 'wishToReadBtn') {
-                                    statusText = 'Wish to Read';
-                                } else if (clickedId === 'currentlyReadingBtn') {
-                                    statusText = 'Currently Reading';
-                                } else if (clickedId === 'completedBtn') {
-                                    statusText = 'Completed';
-                                }
-
-                                $('#bookStatusBtnGrp .status-btn')
-                                    .removeClass('btn-outline-success active btn-outline-light')
-                                    .addClass('btn-light text-dark border');
-
-                                $(this)
-                                    .removeClass('btn-light text-dark')
-                                    .addClass('btn-outline-success active');
-
-                                sendPartialUpdate(getActiveBookId(), { BookStatus: statusText });
-                            });
-        
-                            $('#saveNoteBtn').on('click', function() {
-                                let notesValue = $('#noteTextarea').val().trim();
-                                sendPartialUpdate(getActiveBookId(), { UserNotes: notesValue });
-                            }); 
         });
     </script>
 }

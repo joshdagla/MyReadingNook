@@ -2,36 +2,93 @@
     Layout = "_Layout";
 }
 
-<div class="container d-flex justify-content-between align-items-center">
-    <h2 style="font-family: 'Calisto MT', sans-serif" class="m-0">My Collections</h2>
-    <div class="add-button">
-        <button id="addCollectionBtn" type="button" class="add-button btn fs-5 d-inline-flex align-items-center">
-            <i class="bi bi-plus-square me-2"></i> Add Collection
-        </button>
-    </div>
-</div>
-<div style="font-family: 'Calisto MT', sans-serif" id="collectionInputGrp" class="d-none form-outline container d-flex justify-content-between align-items-baseline">
-    <div data-mdb-input-init class="form-outline mt-3 w-50">
-        <input class="form-control" id="collectionName" rows="1" placeholder="Name of Collection">
-        <div class="alert alert-success my-2 d-none" id="collectionSuccess" role="alert" style="padding: 0.25rem 0.5rem; display: inline-block;"></div>
-        <div class="alert alert-danger my-2 d-none" id="collectionFail" role="alert" style="padding: 0.25rem 0.5rem; display: inline-block;"></div>
-        <div id="collectionBtnGrp" class="btn-group-sm mt-2">
-            <button id="collectionSubmitBtn" type="button" class="btn btn-dark fs-6 d-inline-flex align-items-center">
-                Submit
-            </button>
-            <button id="cancelBtn" type="button" class="btn btn-secondary fs-6 d-inline-flex align-items-center">
-                Cancel
+<div class="container py-3">
+    <div class="d-flex justify-content-between align-items-start pb-3 border-bottom mb-4">
+        <div style="font-family: 'Calisto MT', sans-serif" class="flex-grow-1 me-3">
+            <h1  class="h2 fw-bold text-dark mb-0 custom-serif-font">My Collections</h1>
+            <p class="text-secondary mb-0 fs-6 custom-serif-font">Browse and manage your reading collections</p>
+        </div>
+
+        <div class="flex-shrink-0">
+            <button id="addCollectionBtn" type="button" class="btn btn-success shadow-sm fw-medium px-3">
+                <i class="bi bi-plus-lg me-1"></i> Add Collection
             </button>
         </div>
     </div>
+
+    <div style="font-family: 'Calisto MT', sans-serif" id="collectionInputGrp" class="d-none mb-4">
+        <div class="card border-0 shadow-sm p-3" style="max-width: 500px;">
+            <input class="form-control mb-2" id="collectionName" placeholder="Name of Collection">
+            <input class="form-control mb-2" id="collectionDescription" placeholder="Description (Optional)">
+            <div class="alert alert-success my-1 d-none" id="collectionSuccess" role="alert" style="padding: 0.25rem 0.5rem;"></div>
+            <div class="alert alert-danger my-1 d-none" id="collectionFail" role="alert" style="padding: 0.25rem 0.5rem;"></div>
+            <div id="collectionBtnGrp" class="btn-group-sm mt-1">
+                <button id="collectionSubmitBtn" type="button" class="btn btn-dark btn-sm">Submit</button>
+                <button id="cancelBtn" type="button" class="btn btn-secondary btn-sm">Cancel</button>
+            </div>
+        </div>
     </div>
 
-<style>
+    <div id="collectionsGrid" class="row g-4"></div>
+</div><style>
     .add-button {
         border-radius: 6px;
         border: none;
         box-shadow: 0 0 0 0.5px black;
         font-family: 'Calisto MT', sans-serif !important;
+    }
+
+    .collection-card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        font-family: 'Calisto MT', sans-serif;
+        transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .collection-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .collection-card-body {
+        padding: 1.25rem;
+    }
+
+    .collection-summary {
+        font-size: 0.9rem;
+        color: #6b6559;
+        margin-top: 0.25rem;
+    }
+
+    .collection-date {
+        font-size: 0.85rem;
+        color: #8a8378;
+        margin-top: 0.5rem;
+    }
+
+    .book-strip {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 0.75rem 1.25rem 1.25rem;
+    }
+
+    .book-strip img {
+        width: 60px;
+        height: 90px;
+        object-fit: cover;
+        border-radius: 4px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        flex-shrink: 0;
+    }
+
+    .empty-shelf-msg {
+        font-size: 0.85rem;
+        color: #aaa;
+        font-style: italic;
+        padding: 0 1.25rem 1.25rem;
     }
 </style>
 
@@ -39,37 +96,96 @@
 {
     <script>
         $(document).ready(function () {
+
+            let selectedCollectionId = null;
+            
+            function loadCollections() {
+                $.ajax({
+                    url: "/api/BookList/getAll",
+                    type: "GET",
+                    headers: {
+                        Authorization: "Bearer " + sessionStorage.getItem("authToken"),
+                    },
+                    success: function (collections) {
+                        renderCollections(collections);
+                    },
+                    error: function (response) {
+                        console.log("Failed to load collections", response.responseJSON);
+                    }
+                });
+            }
+
+            function renderCollections(collections) {
+                const grid = $("#collectionsGrid");
+                grid.empty();
+
+                collections.forEach(function (collection) {
+                    const dateFormatted = new Date(collection.createdAt).toLocaleDateString("en-US", {
+                        year: "numeric", month: "short", day: "numeric"
+                    });
+
+                    let bookCoversHtml = "";
+                    if (collection.bookCovers && collection.bookCovers.length > 0) {
+                        collection.bookCovers.forEach(function (coverUrl) {
+                            const cover = coverUrl || "https://via.placeholder.com/60x90?text=No+Cover";
+                            bookCoversHtml += `<img src="${cover}" alt="Book cover">`;
+                        });
+                    }
+
+                    const cardHtml = `
+                            <div class="col-md-4">
+                                <div class="card collection-card h-100">
+                                    <div class="collection-card-body">
+                                        <h5 class="mb-1">${collection.listName}</h5>
+                                        <div class="collection-date">Created ${dateFormatted}</div>
+                                    </div>
+                                    ${collection.bookCovers && collection.bookCovers.length > 0
+                                        ? `<div class="book-strip">${bookCoversHtml}</div>`
+                                        : `<div class="empty-shelf-msg">No books added yet</div>`}
+                                </div>
+                            </div>
+                        `;
+
+                    grid.append(cardHtml);
+                    selectedCollectionId = collection.id;
+                });
+            }
+
+            loadCollections();
+            
+            
+            $(document).on('click', '.collection-card', function () {
+                window.location.href = "/BookData/Collection/" + selectedCollectionId
+            })
+
             $("#addCollectionBtn").on("click", function (event) {
                 $("#collectionInputGrp").removeClass("d-none");
             });
             $("#cancelBtn").on("click", function (event) {
                 $("#collectionInputGrp").addClass("d-none");
             });
-            
+
             $("#collectionSubmitBtn").on("click", function (event) {
                 $.ajax({
-                    url: "/api/BookList/new",
+                    url: "/api/BookList/create",
                     type: "POST",
-                    dataType: "application/json",
+                    contentType: "application/json",
                     headers: {
                         Authorization: "Bearer " + sessionStorage.getItem("authToken"),
                     },
-                    data: {
+                    data: JSON.stringify({
                         name: $("#collectionName").val(),
-                    },
+                        summary: $("#collectionDescription").val(),
+                    }),
                     success: function (data) {
-                        $("#collectionSuccess").removeClass("d-none").text(`Successfully created collection ${data.name}`);
+                        $("#collectionSuccess").removeClass("d-none").text(`Successfully created collection`);
                         window.location.reload();
                     },
                     error: function (response) {
-                        $("#collectionFail").removeClass("d-none").text(`Error creating collection. ${response}`);
-                        setTimeout(function() {
-                            window.location.reload();
-                        }, 3000);
+                        $("#collectionFail").removeClass("d-none").text(`Error creating collection`);
                     }
                 });
             });
         })
     </script>
 }
-

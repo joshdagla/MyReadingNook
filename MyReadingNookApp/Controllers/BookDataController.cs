@@ -8,4 +8,9 @@ public class BookDataController : Controller
     {
         return View();
     }
+
+    public IActionResult Collection()
+    {
+        return View();
+    }
 }

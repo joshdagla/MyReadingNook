@@ -4,9 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using MyReadingNookApp.Extensions;
 using MyReadingNookApp.Models;
 using MyReadingNookApp.Services;
+using MyReadingNookApp.Dtos.BookList;
+using MyReadingNookApp.Dtos.UserBooks;
+using MyReadingNookApp.Migrations;
+using UserBookModel = MyReadingNookApp.Models.UserBookModel;
 
 namespace MyReadingNookApp.Controllers;
 
+[ApiController]
+[Route("/api/[controller]")]
 public class BookListController : ControllerBase
 {
     private readonly NookContext _nookContext;
@@ -18,10 +24,48 @@ public class BookListController : ControllerBase
         _bookListService = bookListService;
     }
 
+    // Fetch all collections
+    [Authorize]
+    [HttpGet("getAll")]
+    public async Task<IActionResult> GetAllCollections()
+    {
+        int userId = User.GetUserId();
+        
+        var userNav = await _nookContext.Users
+            .Where(u => u.Id == userId)
+            .FirstOrDefaultAsync();
+
+        if (userNav == null)
+        {
+            return NotFound("User not found");
+        }
+        
+        var collections = await _nookContext.BookLists
+            .Where(u => u.UserModel.Id == userId)
+            .Select(u => new GetBookListDto
+            {
+                Id = u.Id,
+                ListName = u.ListName,
+                CreatedAt = u.DateCreated,
+                BookCovers = u.BookItems
+                    .Select(b => b.ImagePath)
+                    .Where(img => !string.IsNullOrEmpty(img))
+                    .ToList()
+            })
+            .ToListAsync();
+
+        if (collections.Count == 0)
+        {
+            return BadRequest("No collections found");
+        }
+        
+        return Ok(collections);
+    }
+    
     // Create new book list for user
     [Authorize]
-    [HttpPost("new")]
-    public async Task<IActionResult> CreateBookList([FromBody] string newListName)
+    [HttpPost("create")]
+    public async Task<IActionResult> CreateBookList([FromBody] CreateBookListDto dto)
     {
         int userId = User.GetUserId();
 
@@ -34,19 +78,19 @@ public class BookListController : ControllerBase
             return BadRequest("User not found");
         }
 
-        if (newListName == "")
+        if (string.IsNullOrWhiteSpace(dto.Name))
         {
             return BadRequest("List name is empty");
         }
 
         BookListModel newBookList = new BookListModel
         {
-            ListName = newListName,
+            ListName = dto.Name,
             UserModel = userNav,
+            Summary = dto.Summary,
         };
 
         _nookContext.BookLists.Add(newBookList);
-
         await _nookContext.SaveChangesAsync();
         
         return Ok("Book list created successfully");
@@ -73,6 +117,29 @@ public class BookListController : ControllerBase
         await _nookContext.SaveChangesAsync();
         
         return Ok("Book list name updated successfully");
+    }
+
+    // Put endpoint to update book list summary
+    [Authorize]
+    [HttpPut("update/summary/{bookListId}")]
+    public async Task<IActionResult> UpdateListSummary([FromRoute] int bookListId,[FromBody] string summary)
+    {
+        int userId = User.GetUserId();
+        
+        var bookListModel = await _nookContext.BookLists
+            .Where(bl => bl.UserModel.Id == userId && bl.Id == bookListId)
+            .FirstOrDefaultAsync();
+
+        if (bookListModel == null)
+        {
+            return BadRequest("Book list not found");
+        }
+        
+        bookListModel.Summary = summary;
+        
+        await _nookContext.SaveChangesAsync();
+        
+        return Ok("Book list summary updated successfully");
     }
 
     // Delete endpoint to delete the list
@@ -102,7 +169,7 @@ public class BookListController : ControllerBase
     // Add a book in the list
     [Authorize]
     [HttpPost("add/{bookListId}")]
-    public async Task<IActionResult> AddBookToList([FromQuery] int bookListId, [FromBody] int bookId)
+    public async Task<IActionResult> AddBookToList([FromRoute] int bookListId, [FromBody] int bookId)
     {
         int userId = User.GetUserId();
         
@@ -114,6 +181,12 @@ public class BookListController : ControllerBase
         }
         
         var result = await _bookListService.AddBookListAsync(userId, bookListId, currentBook);
+
+        if (!result.Success)
+        {
+            return BadRequest(result.ErrorMessage);
+        }
+        
         return Ok(result);
     }
 
@@ -149,15 +222,65 @@ public class BookListController : ControllerBase
         if (bookListModel == null)
         {
             return BadRequest("Book list not found");
-        }       
-        
-        var allBooks = await _nookContext.BookLists.Select(b => b.BookItems).ToListAsync();
-
-        if (bookListModel == null)
-        {
-            return BadRequest("No books found in list");
         }
+
+        var collectionDetails = await _nookContext.BookLists
+            .Where(u => u.UserModel.Id == userId && u.Id == bookListModel.Id)
+            .Select(u => new CollectionDetailDto
+            {
+                Id = u.Id,
+                Name = u.ListName,
+                Description = u.Summary,
+                CreatedAt = u.DateCreated,
+
+                Books = u.BookItems.Select(b => new AllBooksResponseDto
+                    {
+                        BookId = b.Id,
+                        Title = b.Title,
+                        Author = b.Author,
+                        ImagePath = b.ImagePath,
+                        BookRating = _nookContext.UserBooks
+                            .Where(ub => ub.UserModel.Id == userId && ub.BookModel.Id == b.Id)
+                            .Select(ub => ub.BookRating)
+                            .FirstOrDefault(),
+
+                        BookStatus = _nookContext.UserBooks
+                            .Where(ub => ub.UserModel.Id == userId && ub.BookModel.Id == b.Id)
+                            .Select(ub => ub.BookStatus)
+                            .FirstOrDefault()
+                    })
+                    .ToList()
+            })
+            .FirstOrDefaultAsync();
+
+        return Ok(collectionDetails);
+    }
+
+    [Authorize]
+    [HttpGet("options/{bookListId}")]
+    public async Task<IActionResult> GetBookOptions([FromRoute] int bookListId)
+    {
+        int userId = User.GetUserId();
+
+        var existingBookIds = await _nookContext.BookLists
+            .Where(bl => bl.Id == bookListId)
+            .SelectMany(bl => bl.BookItems.Select(b => b.Id))
+            .ToListAsync();
+
+        var allUserBooks = await _nookContext.UserBooks
+            .Where(ub => ub.UserModel.Id == userId)
+            .Select(ub => new
+            {
+                BookId = ub.BookModel.Id,
+                Title = ub.BookModel.Title,
+                ImagePath = ub.BookModel.ImagePath,
+            })
+            .ToListAsync();
+
+        var availableBooks = allUserBooks
+            .ExceptBy(existingBookIds, book => book.BookId)
+            .ToList();    
         
-        return Ok(allBooks);
+        return Ok(availableBooks);
     }
 }

@@ -32,7 +32,7 @@ public class UserBooksController : ControllerBase
                .Where(ub => ub.UserId == userId)
                .Select(ub => new AllBooksResponseDto
                {
-                   BookId = ub.BookModel.Id,
+                   BookId = ub.BookId,
                    Title = ub.BookModel.Title,
                    Author = ub.BookModel.Author,
                    ImagePath = ub.BookModel.ImagePath,
@@ -40,10 +40,16 @@ public class UserBooksController : ControllerBase
                    BookRating = ub.BookRating
                })
                .ToListAsync();
+
+           if (allUserBooks.Count == 0)
+           {
+               return NotFound($"No Book found");
+           }
       
            return Ok(allUserBooks);
        }
-       catch (Exception e)
+       
+       catch (Exception)
        {
            return StatusCode(500, "An internal server error has occurred");
        }

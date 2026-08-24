@@ -34,4 +34,6 @@ public class BookModel
     [Unicode(false)] 
     [MaxLength(300)]
     public string? ImagePath { get; set; }
+
+    public List<BookListModel>? BookList { get; set; } = new();
 }

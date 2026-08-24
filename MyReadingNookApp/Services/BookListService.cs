@@ -16,6 +16,7 @@ public class BookListService : IBookListService
     public async Task<BookToListResult> AddBookListAsync(int userId, int bookListId, BookModel bookModel)
     {
         var bookList = await _nookContext.BookLists
+            .Include(bl => bl.BookItems)
             .Where(bl => bl.Id == bookListId && bl.UserModel.Id == userId)
             .FirstOrDefaultAsync();
         
@@ -23,8 +24,8 @@ public class BookListService : IBookListService
             .Where(bl => bl.Id == bookListId && bl.UserModel.Id == userId && bl.BookItems.Any(bi => bi.Id == bookModel.Id))
             .AnyAsync();
 
-        // Book not found in the list
-        if (bookExistsInList == true)
+        // Book already in list
+        if (bookExistsInList)
         {
             return new BookToListResult
             {

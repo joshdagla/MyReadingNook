@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.InteropServices.JavaScript;
 using Microsoft.EntityFrameworkCore;
 
 namespace MyReadingNookApp.Models;
@@ -15,7 +16,12 @@ public class BookListModel
     [MaxLength(100)]
     public string ListName { get; set; }
 
-    public List<BookModel> BookItems { get; set; } = new();
+    public List<BookModel>? BookItems { get; set; } = new();
+
+    [Column(TypeName = "TEXT")]
+    public string? Summary { get; set; }
+
+    public DateOnly DateCreated { get; set; } = DateOnly.FromDateTime(DateTime.Now);
     
     public UserModel UserModel { get; set; } = null!;
 }

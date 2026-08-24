@@ -22,6 +22,21 @@ namespace MyReadingNookApp.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("BookListModelBookModel", b =>
+                {
+                    b.Property<int>("BookItemsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BookListId")
+                        .HasColumnType("int");
+
+                    b.HasKey("BookItemsId", "BookListId");
+
+                    b.HasIndex("BookListId");
+
+                    b.ToTable("BookListModelBookModel");
+                });
+
             modelBuilder.Entity("MyReadingNookApp.Models.BookListModel", b =>
                 {
                     b.Property<int>("Id")
@@ -30,10 +45,16 @@ namespace MyReadingNookApp.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateOnly>("DateCreated")
+                        .HasColumnType("date");
+
                     b.Property<string>("ListName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<string>("Summary")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("UserModelId")
                         .HasColumnType("int");
@@ -61,9 +82,6 @@ namespace MyReadingNookApp.Migrations
                         .HasMaxLength(75)
                         .HasColumnType("varchar(75)");
 
-                    b.Property<int?>("BookListModelId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
@@ -88,8 +106,6 @@ namespace MyReadingNookApp.Migrations
                         .HasColumnType("varchar(100)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BookListModelId");
 
                     b.HasIndex("Isbn")
                         .IsUnique();
@@ -166,6 +182,21 @@ namespace MyReadingNookApp.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("BookListModelBookModel", b =>
+                {
+                    b.HasOne("MyReadingNookApp.Models.BookModel", null)
+                        .WithMany()
+                        .HasForeignKey("BookItemsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyReadingNookApp.Models.BookListModel", null)
+                        .WithMany()
+                        .HasForeignKey("BookListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("MyReadingNookApp.Models.BookListModel", b =>
                 {
                     b.HasOne("MyReadingNookApp.Models.UserModel", "UserModel")
@@ -175,13 +206,6 @@ namespace MyReadingNookApp.Migrations
                         .IsRequired();
 
                     b.Navigation("UserModel");
-                });
-
-            modelBuilder.Entity("MyReadingNookApp.Models.BookModel", b =>
-                {
-                    b.HasOne("MyReadingNookApp.Models.BookListModel", null)
-                        .WithMany("BookItems")
-                        .HasForeignKey("BookListModelId");
                 });
 
             modelBuilder.Entity("MyReadingNookApp.Models.UserBookModel", b =>
@@ -201,11 +225,6 @@ namespace MyReadingNookApp.Migrations
                     b.Navigation("BookModel");
 
                     b.Navigation("UserModel");
-                });
-
-            modelBuilder.Entity("MyReadingNookApp.Models.BookListModel", b =>
-                {
-                    b.Navigation("BookItems");
                 });
 #pragma warning restore 612, 618
         }

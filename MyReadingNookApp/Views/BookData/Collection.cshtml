@@ -1,0 +1,252 @@
+@page "/MyReadingNook/BookData/Collection/{bookListId:int?}"
+@model MyReadingNookApp.Models.BookListModel
+@{
+    Layout = "_Layout";
+}
+
+<div class="container py-3">
+    <div class="d-flex justify-content-between align-items-start pb-3 border-bottom mb-4">
+        <div class="flex-grow-1 me-3">
+            <div class="d-flex align-items-baseline gap-2 mb-1">
+                <h1 class="h2 fw-bold text-dark mb-0 custom-serif-font" id="collectionName"></h1>
+                <span class="text-muted fs-6 fst-italic small custom-serif-font" id="collectionDate"></span>
+            </div>
+            <p class="text-secondary mb-0 fs-5 custom-serif-font" id="collectionSummary"></p>
+        </div>
+
+        <div class="flex-shrink-0">
+            <div class="dropdown">
+                <button class="btn btn-success shadow-sm dropdown-toggle fw-medium px-3" type="button" id="addBooksMenuBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                    <i class="bi bi-plus-lg me-1"></i> Add Books
+                </button>
+
+                <div class="dropdown-menu dropdown-menu-end p-3 shadow-lg border-0 rounded-3 mt-2" aria-labelledby="addBooksMenuBtn" style="width: 380px; max-height: 500px; overflow-y: auto;">
+                    
+                    <div class="sticky-top bg-white pb-2 border-bottom mb-2">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light border-end-0 text-muted">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" id="bookSearchInput" class="form-control bg-light border-start-0" placeholder="Search your collection..." autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div id="dropdownBookGrid" class="row row-cols-2 g-2"></div>
+
+                    <div id="noBooksFound" class="text-center text-muted py-4 d-none">
+                        <i class="bi bi-book d-block text-muted opacity-50 mb-1"></i>
+                        <small>No books found matching your search.</small>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </div>
+
+    <div id="collectionBooksGrid" class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3"></div>
+</div>
+
+<style>
+    .custom-serif-font {
+        font-family: 'Calisto MT', 'Georgia', serif;
+    }
+
+    .book-hover-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .book-hover-card img {
+        transition: filter 0.25s ease-in-out, opacity 0.25s ease-in-out;
+        height: 140px;
+        object-fit: contain;
+        width: 100%;
+    }
+
+    .book-hover-card:hover img {
+        filter: brightness(1.25) contrast(0.85);
+        opacity: 0.65;
+    }
+
+    .book-hover-card .add-btn-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease-in-out;
+        z-index: 2;
+    }
+
+    .book-hover-card:hover .add-btn-overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .book-title-subtext {
+        font-size: 0.75rem;
+        line-height: 1.1;
+        max-width: 100%;
+    }
+</style>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            const pathSegments = window.location.pathname.split('/');
+            const bookListId = pathSegments[pathSegments.length - 1];
+
+            if (bookListId && !isNaN(bookListId)) {
+                loadCollectionDetails(bookListId);
+                loadDropdownOptions(bookListId);
+            } else {
+                console.error("Invalid or missing Book List ID in route.");
+                $("#collectionName").text("Error: Invalid Collection ID");
+            }
+
+            // Real-time search filter
+            $("#bookSearchInput").on("keyup search", function () {
+                const query = $(this).val().toLowerCase().trim();
+                let visibleCount = 0;
+
+                $(".book-item").each(function () {
+                    const title = $(this).attr("data-title") || "";
+                    if (title.includes(query)) {
+                        $(this).removeClass("d-none");
+                        visibleCount++;
+                    } else {
+                        $(this).addClass("d-none");
+                    }
+                });
+
+                if (visibleCount === 0) {
+                    $("#noBooksFound").removeClass("d-none");
+                } else {
+                    $("#noBooksFound").addClass("d-none");
+                }
+            });
+
+            // Delegated click handler for + Add buttons
+            $(document).on("click", ".add-to-list-btn", function (event) {
+                event.preventDefault();
+                event.stopPropagation(); // Keeps dropdown open
+
+                const $btn = $(this);
+                const addedBookId = $btn.data("bookId") || $btn.data("book-id");
+
+                $.ajax({
+                    url: "/api/BookList/add/" + bookListId,
+                    method: "POST",
+                    contentType: "application/json",
+                    headers: {
+                        Authorization: "Bearer " + sessionStorage.getItem("authToken")
+                    },
+                    data: JSON.stringify(addedBookId),
+                    success: function () {
+                        $btn.replaceWith('<span class="badge bg-secondary p-2"><i class="bi bi-check-lg"></i> Added</span>');
+                        loadCollectionDetails(bookListId);
+                    },
+                    error: function (xhr) {
+                        console.error("Failed to add book to list:", xhr.responseText);
+                    }
+                });
+            });
+        });
+
+        // Load page details & collection books
+        function loadCollectionDetails(bookListId) {
+            $.ajax({
+                url: "/api/BookList/get/" + bookListId,
+                method: "GET",
+                headers: {
+                    Authorization: "Bearer " + sessionStorage.getItem("authToken"),
+                },
+                success: function (data) {
+                    $("#collectionName").text(data.name);
+                    $("#collectionSummary").text(data.description || "No summary provided.");
+
+                    if (data.createdAt) {
+                        const formattedDate = new Date(data.createdAt).toLocaleDateString("en-US", {
+                            year: "numeric", month: "short", day: "numeric"
+                        });
+                        $("#collectionDate").text("Created: " + formattedDate);
+                    }
+
+                    const $grid = $("#collectionBooksGrid").empty();
+
+                    if (!data.books || data.books.length === 0) {
+                        $grid.append('<div class="col-12 text-muted">No books in this collection yet.</div>');
+                        return;
+                    }
+
+                    $.each(data.books, function (index, book) {
+                        const bookCard = `
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <img src="${book.imagePath || '/images/no-cover.png'}" class="card-img-top p-2" style="height:220px; object-fit:contain;" alt="${book.title}">
+                                <div class="card-body">
+                                    <h6 class="card-title fw-bold text-truncate">${book.title}</h6>
+                                    <p class="card-text small text-muted">${book.author}</p>
+                                </div>
+                            </div>
+                        </div>`;
+                        $grid.append(bookCard);
+                    });
+                },
+                error: function (xhr) {
+                    console.error("Failed to load collection details:", xhr.responseText);
+                    $("#collectionName").text("Error Loading Collection");
+                }
+            });
+        }
+
+        // Fetch options for the "Add Books" dropdown
+        function loadDropdownOptions(bookListId) {
+            $.ajax({
+                url: "/api/BookList/options/" + bookListId,
+                type: "GET",
+                dataType: "json",
+                headers: {
+                    Authorization: "Bearer " + sessionStorage.getItem("authToken"),
+                },
+                success: function (books) {
+                    let $grid = $("#dropdownBookGrid").empty();
+
+                    if (!books || books.length === 0) {
+                        $("#noBooksFound").removeClass("d-none");
+                        return;
+                    }
+                    $("#noBooksFound").addClass("d-none");
+
+                    $.each(books, function (index, book) {
+                        const bookId = book.bookId || book.id;
+                        const bookCardHtml = `
+                        <div class="col book-item" data-title="${(book.title || '').toLowerCase()}">
+                            <div class="card h-100 border-0 shadow-sm p-2 text-center">
+                                <div class="book-hover-card">
+                                    <img src="${book.imagePath || '/images/no-cover.png'}" alt="${book.title}">
+                                    <div class="add-btn-overlay">
+                                        <button type="button" class="btn btn-sm btn-success fw-bold shadow-sm add-to-list-btn" data-book-id="${bookId}">
+                                            + Add
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <p class="fw-semibold text-dark mb-0 text-truncate book-title-subtext" title="${book.title}">${book.title}</p>
+                                </div>
+                            </div>
+                        </div>`;
+                        $grid.append(bookCardHtml);
+                    });
+                },
+                error: function (xhr) {
+                    console.error("Failed to load dropdown options:", xhr.responseText);
+                }
+            });
+        }
+    </script>
+}
