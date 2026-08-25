@@ -148,7 +148,7 @@ public class BookListController : ControllerBase
     // Delete endpoint to delete the list
     [Authorize]
     [HttpDelete("delete/{bookListId}")]
-    public async Task<IActionResult> DeleteBookList([FromBody] int bookListId)
+    public async Task<IActionResult> DeleteBookList([FromRoute] int bookListId)
     {
         int userId = User.GetUserId();
         

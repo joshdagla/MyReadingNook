@@ -9,6 +9,15 @@
         window.location.href = "/Account/Login";
     }
     
+    $.ajaxSetup({
+        statusCode: {
+            401: function ()
+            {
+                window.location.href = "/Account/Login";
+            }
+        }
+    })
+    
     $(document).ready(function () {
     let searchTimeout;
 

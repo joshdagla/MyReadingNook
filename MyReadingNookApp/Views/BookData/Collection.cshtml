@@ -15,11 +15,17 @@
         </div>
         
         <div class="flex-shrink-0">
-            <button class="btn btn-library-tertiary mx-2 shadow-sm fw-medium px-3" type="button" id="updateCollectionInfoBtn">
+            <button class="btn btn-library-tertiary  shadow-sm fw-medium px-3" type="button" id="updateCollectionInfoBtn">
                 <i class="bi bi-clipboard2"></i> Update Collection
             </button>
+            
         </div>
         
+        <div class="flex-shrink-0">
+            <button class="btn btn-library-tertiary shadow-sm fw-medium mx-2 px-3" type="button" id="deleteCollectionBtn">
+                <i class="bi bi-file-x"></i> Delete Collection
+            </button>
+        </div>
 
         <div class="flex-shrink-0">
             <div class="dropdown">
@@ -50,22 +56,44 @@
         
     </div>
 
-    <div style="font-family: 'Calisto MT', sans-serif" id="collectionInfoUpdateGrp" class="d-none mb-4">
-        <div class="card create-collection-card shadow-sm p-3" style="max-width: 500px;">
-            <input class="form-control mb-2" id="updateName" placeholder="Update Collection Name">
-            <input class="form-control mb-2" id="updateDescription" placeholder="Update Collection Description">
-            <div class="alert alert-success my-1 d-none" id="updateSuccess" role="alert" style="padding: 0.25rem 0.5rem;"></div>
-            <div class="alert alert-danger my-1 d-none" id="updateFail" role="alert" style="padding: 0.25rem 0.5rem;"></div>
-            <div id="collectionBtnGrp" class="btn-group-sm mt-1 d-flex gap-2">
-                <button id="infoSubmitBtn" type="button" class="btn btn-library-primary btn-sm">Submit</button>
-                <button id="infoCancelBtn" type="button" class="btn btn-library-secondary btn-sm">Cancel</button>
+    <div>
+        <div style="font-family: 'Calisto MT', sans-serif" id="collectionInfoUpdateGrp" class="d-none mb-4">
+            <div class="card create-collection-card shadow-sm p-3" style="max-width: 500px;">
+                <input class="form-control mb-2" id="updateName" placeholder="Update Collection Name">
+                <input class="form-control mb-2" id="updateDescription" placeholder="Update Collection Description">
+                <div class="alert alert-success my-1 d-none" id="updateSuccess" role="alert" style="padding: 0.25rem 0.5rem;"></div>
+                <div class="alert alert-danger my-1 d-none" id="updateFail" role="alert" style="padding: 0.25rem 0.5rem;"></div>
+                <div id="collectionBtnGrp" class="btn-group-sm mt-1 d-flex gap-2">
+                    <button id="infoSubmitBtn" type="button" class="btn btn-library-primary btn-sm">Submit</button>
+                    <button id="infoCancelBtn" type="button" class="btn btn-library-secondary btn-sm">Cancel</button>
+                </div>
+            </div>
+        </div> 
+        
+        <div style="font-family: 'Calisto MT', sans-serif" id="deleteCollectionGrp" class="mb-4 d-none d-flex justify-content-center align-items-center">
+            <div style="border-radius: 6px; border: 2px solid #c7b790; background-color: #e0d5b9" class="p-3 w-auto">
+                <div style="color:#3a3626" class="fw-medium fs-5">Are you sure you want to delete this collection?</div>
+                <div class="container d-flex justify-content-center align-items-center">
+                    <button style="border-radius: 12px" class="btn btn-library-primary w-25" id="yesDeleteBtn">Yes</button>
+                    <button class="btn mx-2 w-25 no-button" id="noDeleteBtn">No</button>
+                </div>
             </div>
         </div>
-    </div> 
+    </div>
     <div id="collectionBooksGrid" class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3"></div>
 </div>
 
 <style>
+    .no-button {
+       border-radius: 12px;
+       background-color: #fcf4e5;
+        border-color: #c7b790;
+    }
+    
+    .no-button:hover {
+        border-color: #c7b790;
+        background-color: #e5dbc9;
+    }
 
     .create-collection-card {
         background-color: #faf6ee;
@@ -290,11 +318,32 @@
             $("#updateCollectionInfoBtn").on("click", function (event) {
                 event.preventDefault();
                 $("#collectionInfoUpdateGrp").removeClass("d-none");
+                
+                if (!$("#deleteCollectionGrp").hasClass("d-none")) 
+                {
+                    $("#deleteCollectionGrp").addClass("d-none");
+                }
             });
+            
             $("#infoCancelBtn").on("click", function (event) {
                 event.preventDefault();
                 $("#collectionInfoUpdateGrp").addClass("d-none");
             });
+            
+            $("#deleteCollectionBtn").on("click", function (event) {
+                event.preventDefault();
+                $("#deleteCollectionGrp").removeClass("d-none");
+
+                if (!$("#collectionInfoUpdateGrp").hasClass("d-none"))
+                {
+                    $("#collectionInfoUpdateGrp").addClass("d-none");
+                }
+            });
+            
+            $("#noDeleteBtn").on("click", function (event) {
+                event.preventDefault();
+                $("#deleteCollectionGrp").addClass("d-none");
+            })
             
             $("#infoSubmitBtn").on("click", function (event) {
                 event.preventDefault();
@@ -316,9 +365,34 @@
                                 window.location.reload();
                             }, 2000);
                     },
-                    error: function (xhr) {
+                    error: function () {
                         $("#updateFail").removeClass("d-none").text("Error while updating info");
                     }
+                });
+            });
+            
+            $("#yesDeleteBtn").on("click", function (event) {
+                event.preventDefault();
+                
+                $.ajax({
+                    url: "/api/BookList/delete/" + bookListId,
+                    method: "DELETE",
+                    contentType: "application/json",
+                    headers: {
+                        Authorization: "Bearer " + sessionStorage.getItem("authToken")
+                    },
+                    success: function () {
+                        $("updateSuccess").removeClass("d-none").text("Successfully deleted Collection. Redirecting...");
+                        setTimeout(function () {
+                            window.location.href = "/Home/MyCollections";
+                        }, 2000);
+                    },
+                    error: function () {
+                        $("#updateFail").removeClass("d-none").text("Error while deleting Collection.");
+                         setTimeout(function () {
+                            window.location.reload();
+                        }, 2000);
+                    },
                 });
             });
         });
@@ -352,7 +426,13 @@
                         const bookCard = `
                             <div class="col">
                                 <div id="bookCardDisplay" class="card h-100 library-card">
+                                    <div class="d-flex justify-content-end align-content-end">
+                                        <button class="btn btn-library-tertiary shadow-sm fw-medium p-1">
+                                            <i class="bi bi-dash"></i>
+                                        </button>
+                                    </div>
                                     <div class="book-cover-wrap">
+
                                         <a href="/BookData/Details?bookId=${book.bookId}">
                                             <img src="${book.imagePath || '/images/no-cover.png'}" class="book-cover-img" alt="${book.title}">
                                         </a>
