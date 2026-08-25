@@ -224,7 +224,7 @@
         justify-content: center;
         align-items: center;
     }
-
+    
     .book-cover-img {
         height: 200px;
         object-fit: contain;
@@ -250,6 +250,21 @@
         font-family: 'Calisto MT', serif;
         color: #8a8168;
         margin-bottom: 0;
+    }
+
+    .overlay-button {
+        position: absolute;
+        top: 8px;
+        right: 5px;
+        z-index: 10;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        line-height: 1;
     }
 </style>
 
@@ -395,9 +410,13 @@
                     },
                 });
             });
-        });
 
+        });
+        
         function loadCollectionDetails(bookListId) {
+            
+            let selectedBookId = null;
+            
             $.ajax({
                 url: "/api/BookList/get/" + bookListId,
                 method: "GET",
@@ -425,14 +444,12 @@
                     $.each(data.books, function (index, book) {
                         const bookCard = `
                             <div class="col">
-                                <div id="bookCardDisplay" class="card h-100 library-card">
-                                    <div class="d-flex justify-content-end align-content-end">
-                                        <button class="btn btn-library-tertiary shadow-sm fw-medium p-1">
-                                            <i class="bi bi-dash"></i>
-                                        </button>
-                                    </div>
+                                <div id="bookCardDisplay" class="card h-100 library-card position-relative">
+                                    <button class="btn btn-light overlay-button shadow-sm" type="button" id="bookDeleteBtn">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                            
                                     <div class="book-cover-wrap">
-
                                         <a href="/BookData/Details?bookId=${book.bookId}">
                                             <img src="${book.imagePath || '/images/no-cover.png'}" class="book-cover-img" alt="${book.title}">
                                         </a>
@@ -446,12 +463,41 @@
                             </div>`;
                         
                         $grid.append(bookCard);
+                        selectedBookId = book.bookId;
                     });
                 },
                 error: function (xhr) {
                     console.error("Failed to load collection details:", xhr.responseText);
                     $("#collectionName").text("Error Loading Collection");
                 }
+            });
+
+            $(document).on("click", "#bookDeleteBtn", function (event) {
+                event.preventDefault();
+
+                $.ajax({
+                    url: "/api/BookList/remove/" + bookListId,
+                    method: "DELETE",
+                    contentType: "application/json",
+                    headers: {
+                        Authorization: "Bearer " + sessionStorage.getItem("authToken")
+                    },
+                    data: JSON.stringify({
+                        bookId: selectedBookId,
+                    }),
+                    success: function () {
+                        $("#updateSuccess").removeClass("d-none").text(`Book deleted Successfully`);
+                        // setTimeout(function () {
+                            //window.location.reload();
+                        //}, 1000);
+                    },
+                    error: function () {
+                        $("#updateFail").removeClass("d-none").text("Error while deleting Book.");
+                        // setTimeout(function () {
+                          //  $("#updateFail").addClass("d-none").text("");
+                        //}, 3000)
+                    }
+                });
             });
         }
 
