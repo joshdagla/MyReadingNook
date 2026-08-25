@@ -8,7 +8,6 @@ using MyReadingNookApp.Models;
 
 namespace MyReadingNookApp.Controllers;
 
-// TODO: On the Client-side, BookSearch API will have to be handled using JS fetch
 [ApiController]
 [Route("api/[controller]")] // Route: api/books
 public class BooksController : ControllerBase
@@ -17,13 +16,15 @@ public class BooksController : ControllerBase
     private readonly BookSearchService _bookService;
     private readonly BookAddService _bookAddService;
     private readonly BookDetailService _bookDetailService;
+    private readonly DailyShelfService _dailyShelfService;
 
-    public BooksController(NookContext nookContext,BookSearchService bookService, BookAddService bookAddService, BookDetailService bookDetailService)
+    public BooksController(NookContext nookContext,BookSearchService bookService, BookAddService bookAddService, BookDetailService bookDetailService, DailyShelfService dailyShelfService)
     {
         _nookContext = nookContext;
         _bookService = bookService;
         _bookAddService = bookAddService;
         _bookDetailService = bookDetailService;
+        _dailyShelfService = dailyShelfService;
     }
     
     // Controller to search and query books from Google books api
@@ -35,7 +36,7 @@ public class BooksController : ControllerBase
         [FromQuery] string? isbn, 
         [FromQuery] int maxResults = 10)
     {
-        // Validation: Make sure at least one search criterion is provided
+        // Validation: Makes sure at least one search criterion is provided
         if (string.IsNullOrWhiteSpace(title) && 
             string.IsNullOrWhiteSpace(author) && 
             string.IsNullOrWhiteSpace(isbn))
@@ -75,6 +76,40 @@ public class BooksController : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, new { message = "Google Books API Error", details = ex.Message });
+        }
+    }
+
+    [Authorize]
+    [HttpGet("dailyShelf")]
+    public async Task<IActionResult> GetDailyShelf()
+    {
+        try
+        {
+            var shelfBooks = await _dailyShelfService.GetTodayShelfAsync();
+
+            if (!shelfBooks.Any())
+            {
+                return BadRequest(new { message = "No books found currently for daily shelf" });
+            }
+
+            var formattedResponse = shelfBooks
+                .Select(b => new
+                {
+                    Title = b.VolumeInfo.Title,
+                    Author = b.VolumeInfo.Authors != null
+                        ? string.Join(", ", b.VolumeInfo.Authors)
+                        : "Unknown Author(s)",
+                    Isbn = b.VolumeInfo.IndustryIdentifiers?.FirstOrDefault(i => i.Type == "ISBN_13")?.Identifier
+                           ?? b.VolumeInfo.IndustryIdentifiers?.FirstOrDefault(i => i.Type == "ISBN_10")?.Identifier
+                           ?? "",
+                    ImagePath = b.VolumeInfo.ImageLinks?.Thumbnail,
+                });
+            
+            return Ok(formattedResponse);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, new { message = "Google Books API Error", details = e.Message });
         }
     }
 

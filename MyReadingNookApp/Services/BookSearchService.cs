@@ -22,7 +22,7 @@ public class BookSearchService
     {
         var queryParts = new List<string>();
 
-        // Append Google query prefixes based on user inputs
+        // Appending Google query prefixes based on user inputs
         if (!string.IsNullOrWhiteSpace(title))
             queryParts.Add($"intitle:{title}");
 
@@ -32,12 +32,11 @@ public class BookSearchService
         if (!string.IsNullOrWhiteSpace(isbn))
             queryParts.Add($"isbn:{isbn}");
 
-        // Combining parameters separated by spaces
         string finalQuery = string.Join(" ", queryParts);
 
         if (string.IsNullOrWhiteSpace(finalQuery))
         {
-            return new List<Volume>(); // Return empty if no parameters were supplied
+            return new List<Volume>();
         }
 
         var listRequest = _googleBooksClient.Volumes.List(finalQuery);
