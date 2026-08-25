@@ -13,10 +13,17 @@
             </div>
             <p class="text-secondary mb-0 fs-5 custom-serif-font" id="collectionSummary"></p>
         </div>
+        
+        <div class="flex-shrink-0">
+            <button class="btn btn-library-tertiary mx-2 shadow-sm fw-medium px-3" type="button" id="updateCollectionInfoBtn">
+                <i class="bi bi-clipboard2"></i> Update Collection
+            </button>
+        </div>
+        
 
         <div class="flex-shrink-0">
             <div class="dropdown">
-                <button class="btn btn-success shadow-sm dropdown-toggle fw-medium px-3" type="button" id="addBooksMenuBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                <button class="btn btn-library-tertiary shadow-sm dropdown-toggle fw-medium px-3" type="button" id="addBooksMenuBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                     <i class="bi bi-plus-lg me-1"></i> Add Books
                 </button>
 
@@ -40,12 +47,88 @@
                 </div>
             </div> 
         </div>
+        
     </div>
 
+    <div style="font-family: 'Calisto MT', sans-serif" id="collectionInfoUpdateGrp" class="d-none mb-4">
+        <div class="card create-collection-card shadow-sm p-3" style="max-width: 500px;">
+            <input class="form-control mb-2" id="updateName" placeholder="Update Collection Name">
+            <input class="form-control mb-2" id="updateDescription" placeholder="Update Collection Description">
+            <div class="alert alert-success my-1 d-none" id="updateSuccess" role="alert" style="padding: 0.25rem 0.5rem;"></div>
+            <div class="alert alert-danger my-1 d-none" id="updateFail" role="alert" style="padding: 0.25rem 0.5rem;"></div>
+            <div id="collectionBtnGrp" class="btn-group-sm mt-1 d-flex gap-2">
+                <button id="infoSubmitBtn" type="button" class="btn btn-library-primary btn-sm">Submit</button>
+                <button id="infoCancelBtn" type="button" class="btn btn-library-secondary btn-sm">Cancel</button>
+            </div>
+        </div>
+    </div> 
     <div id="collectionBooksGrid" class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3"></div>
 </div>
 
 <style>
+
+    .create-collection-card {
+        background-color: #faf6ee;
+        border: 1px solid #c7b790 !important;
+        border-radius: 10px;
+    }
+
+    .create-collection-card input.form-control {
+        font-family: 'Calisto MT', serif;
+        background-color: #fff;
+        border: 1px solid #d9cfb0;
+        color: #4d4835;
+        border-radius: 6px;
+    }
+
+    .create-collection-card input.form-control::placeholder {
+        color: #b0a68c;
+    }
+
+    .create-collection-card input.form-control:focus {
+        border-color: #b9a677;
+        box-shadow: 0 0 0 0.2rem rgba(185, 166, 119, 0.25);
+    }
+
+    .btn-library-primary {
+        background-color: #4d4835;
+        border-color: #4d4835;
+        color: #faf6ee;
+        font-family: 'Calisto MT', serif;
+    }
+
+    .btn-library-primary:hover {
+        background-color: #3a3626;
+        border-color: #3a3626;
+        color: #faf6ee;
+    }
+
+    .btn-library-secondary {
+        background-color: transparent;
+        border-color: #c7b790;
+        color: #4d4835;
+        font-family: 'Calisto MT', serif;
+    }
+
+    .btn-library-secondary:hover {
+        background-color: #e0d5b9;
+        border-color: #c7b790;
+        color: #4d4835;
+    }
+
+    .btn-library-tertiary {
+        background-color: #e0d5b9;
+        border-color: #c7b790;
+        color: #4d4835;
+        font-family: 'Calisto MT', serif;
+    }
+
+    .btn-library-tertiary:hover {
+        background-color: transparent;
+        border-color: #c7b790;
+        color: #4d4835;
+    }
+    
     .custom-serif-font {
         font-family: 'Calisto MT', 'Georgia', serif;
     }
@@ -203,6 +286,41 @@
                     }
                 });
             });
+            
+            $("#updateCollectionInfoBtn").on("click", function (event) {
+                event.preventDefault();
+                $("#collectionInfoUpdateGrp").removeClass("d-none");
+            });
+            $("#infoCancelBtn").on("click", function (event) {
+                event.preventDefault();
+                $("#collectionInfoUpdateGrp").addClass("d-none");
+            });
+            
+            $("#infoSubmitBtn").on("click", function (event) {
+                event.preventDefault();
+                
+                $.ajax({
+                    url:"/api/BookList/update/" + bookListId,
+                    method: "PATCH",
+                    contentType: "application/json",
+                    headers: {
+                        Authorization: "Bearer " + sessionStorage.getItem("authToken")
+                    },
+                    data: JSON.stringify({
+                        collectionName: $("#updateName").val(),
+                        summary: $("#updateDescription").val(),
+                    }),
+                    success: function (data) {
+                        $("#updateSuccess").removeClass("d-none").text("Successfully updated info"),
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 2000);
+                    },
+                    error: function (xhr) {
+                        $("#updateFail").removeClass("d-none").text("Error while updating info");
+                    }
+                });
+            });
         });
 
         function loadCollectionDetails(bookListId) {
@@ -257,7 +375,6 @@
             });
         }
 
-        // Fetch options for the "Add Books" dropdown
         function loadDropdownOptions(bookListId) {
             $.ajax({
                 url: "/api/BookList/options/" + bookListId,

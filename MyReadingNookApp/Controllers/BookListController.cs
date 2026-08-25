@@ -25,6 +25,7 @@ public class BookListController : ControllerBase
     }
 
     // Fetch all collections
+    //Done
     [Authorize]
     [HttpGet("getAll")]
     public async Task<IActionResult> GetAllCollections()
@@ -63,6 +64,7 @@ public class BookListController : ControllerBase
     }
     
     // Create new book list for user
+    // Done
     [Authorize]
     [HttpPost("create")]
     public async Task<IActionResult> CreateBookList([FromBody] CreateBookListDto dto)
@@ -96,52 +98,53 @@ public class BookListController : ControllerBase
         return Ok("Book list created successfully");
     }
 
-    // Put endpoint to rename book list name
+    // PATCH endpoint to update book list info
     [Authorize]
-    [HttpPut("rename/{bookListId}")]
-    public async Task<IActionResult> UpdateListName([FromBody] string updatedListName, [FromRoute] int bookListId)
+    [HttpPatch("update/{bookListId}")]
+    public async Task<IActionResult> UpdateListName([FromBody] CollectionInfoUpdateDto dto, [FromRoute] int bookListId)
     {
-        int userId = User.GetUserId();
-
-        var bookListModel = await _nookContext.BookLists
-            .Where(u => u.UserModel.Id == userId && u.Id == bookListId)
-            .FirstOrDefaultAsync();
-
-        if (bookListModel == null)
+        try
         {
-            return BadRequest("Book list not found");
+            int userId = User.GetUserId();
+
+            var bookListModel = await _nookContext.BookLists
+                .Where(u => u.UserModel.Id == userId && u.Id == bookListId)
+                .FirstOrDefaultAsync();
+
+            if (bookListModel == null)
+            {
+                return BadRequest("Book list not found");
+            }
+
+            bool isUpdated = false;
+
+            if (!string.IsNullOrWhiteSpace(dto.CollectionName))
+            {
+                bookListModel.ListName = dto.CollectionName;
+                isUpdated = true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.Summary))
+            {
+                bookListModel.Summary = dto.Summary;
+                isUpdated = true;
+            }
+
+            if (!isUpdated)
+            {
+                return BadRequest("No valid update data provided");
+            }
+
+            await _nookContext.SaveChangesAsync();
+        
+            return Ok("Collection info updated successfully");
         }
-
-        bookListModel.ListName = updatedListName;
-
-        await _nookContext.SaveChangesAsync();
-        
-        return Ok("Book list name updated successfully");
-    }
-
-    // Put endpoint to update book list summary
-    [Authorize]
-    [HttpPut("update/summary/{bookListId}")]
-    public async Task<IActionResult> UpdateListSummary([FromRoute] int bookListId,[FromBody] string summary)
-    {
-        int userId = User.GetUserId();
-        
-        var bookListModel = await _nookContext.BookLists
-            .Where(bl => bl.UserModel.Id == userId && bl.Id == bookListId)
-            .FirstOrDefaultAsync();
-
-        if (bookListModel == null)
+        catch (Exception e)
         {
-            return BadRequest("Book list not found");
+            return StatusCode(500, $"Internal Server error occurred: {e.Message}");
         }
-        
-        bookListModel.Summary = summary;
-        
-        await _nookContext.SaveChangesAsync();
-        
-        return Ok("Book list summary updated successfully");
     }
-
+    
     // Delete endpoint to delete the list
     [Authorize]
     [HttpDelete("delete/{bookListId}")]
@@ -167,6 +170,7 @@ public class BookListController : ControllerBase
     }
 
     // Add a book in the list
+    // Done
     [Authorize]
     [HttpPost("add/{bookListId}")]
     public async Task<IActionResult> AddBookToList([FromRoute] int bookListId, [FromBody] int bookId)
@@ -209,6 +213,7 @@ public class BookListController : ControllerBase
     }
 
     // Get all books in a collection
+    //Done
     [Authorize]
     [HttpGet("get/{bookListId}")]
     public async Task<IActionResult> GetAllBooksInList([FromRoute] int bookListId)
@@ -256,6 +261,8 @@ public class BookListController : ControllerBase
         return Ok(collectionDetails);
     }
 
+    // GET endpoint to view available books user CAN add in the collection (aka books that havent already been added)
+    // Done
     [Authorize]
     [HttpGet("options/{bookListId}")]
     public async Task<IActionResult> GetBookOptions([FromRoute] int bookListId)
