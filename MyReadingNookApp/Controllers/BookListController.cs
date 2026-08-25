@@ -197,11 +197,11 @@ public class BookListController : ControllerBase
     // Remove a book from the list
     [Authorize]
     [HttpDelete("remove/{bookListId}")]
-    public async Task<IActionResult> RemoveBookFromList([FromQuery] int bookListId, [FromBody] int bookId)
+    public async Task<IActionResult> RemoveBookFromList([FromRoute] int bookListId, [FromBody] RemoveBookDto dto)
     {
         int userId = User.GetUserId();
         
-        var currentBook = await _nookContext.Books.FirstOrDefaultAsync(b => b.Id == bookId);
+        var currentBook = await _nookContext.Books.FirstOrDefaultAsync(b => b.Id == dto.BookId);
 
         if (currentBook == null)
         {
@@ -209,6 +209,12 @@ public class BookListController : ControllerBase
         }
         
         var result = await _bookListService.RemoveBookListAsync(userId, bookListId, currentBook);
+
+        if (!result.Success)
+        {
+            return BadRequest("An error has occured." + result.ErrorMessage);
+        }
+        
         return Ok(result);
     }
 

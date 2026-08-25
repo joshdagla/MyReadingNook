@@ -68,6 +68,7 @@ public class BookListService : IBookListService
     public async Task<BookToListResult> RemoveBookListAsync(int userId, int bookListId, BookModel bookModel)
     {
         var bookList = await _nookContext.BookLists
+            .Include(bl => bl.BookItems)
             .Where(bl => bl.Id == bookListId && bl.UserModel.Id == userId)
             .FirstOrDefaultAsync();
         
@@ -76,12 +77,12 @@ public class BookListService : IBookListService
             .AnyAsync();
 
         // Book not found in the list
-        if (bookExistsInList)
+        if (!bookExistsInList)
         {
             return new BookToListResult
             {
                 Success = false,
-                ErrorMessage = "Book already exists in the list",
+                ErrorMessage = "Book not found in the list",
             };
         }
 

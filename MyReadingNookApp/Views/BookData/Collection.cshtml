@@ -411,6 +411,37 @@
                 });
             });
 
+            $(document).on("click", ".book-delete-btn", function (event) {
+                event.preventDefault();
+
+                const $btn = $(this);
+                // Read the specific book ID attached to the clicked button
+                const bookIdToDelete = $btn.data("book-id");
+
+                $.ajax({
+                    url: "/api/BookList/remove/" + bookListId,
+                    method: "DELETE",
+                    contentType: "application/json",
+                    headers: {
+                        Authorization: "Bearer " + sessionStorage.getItem("authToken")
+                    },
+                    data: JSON.stringify({
+                        bookId: bookIdToDelete
+                    }),
+                    success: function () {
+                        $("#updateSuccess").removeClass("d-none").text("Book deleted successfully");
+
+                        // Instantly remove the card from UI without full page refresh
+                        $btn.closest(".col").fadeOut(300, function() {
+                            $(this).remove();
+                        });
+                    },
+                    error: function () {
+                        $("#updateFail").removeClass("d-none").text("Error while deleting book.");
+                    }
+                });
+            }); 
+
         });
         
         function loadCollectionDetails(bookListId) {
@@ -442,15 +473,19 @@
                     }
 
                     $.each(data.books, function (index, book) {
+                        // Standardize property access (book.id or book.bookId depending on API response)
+                        const currentBookId = book.id || book.bookId;
+
                         const bookCard = `
                             <div class="col">
-                                <div id="bookCardDisplay" class="card h-100 library-card position-relative">
-                                    <button class="btn btn-light overlay-button shadow-sm" type="button" id="bookDeleteBtn">
+                                <div class="card h-100 library-card position-relative">
+                                    <!-- Use class instead of id, and store book ID in data-book-id -->
+                                    <button class="btn btn-light overlay-button shadow-sm book-delete-btn" type="button" data-book-id="${currentBookId}">
                                         <i class="bi bi-x"></i>
                                     </button>
                             
                                     <div class="book-cover-wrap">
-                                        <a href="/BookData/Details?bookId=${book.bookId}">
+                                        <a href="/BookData/Details?bookId=${currentBookId}">
                                             <img src="${book.imagePath || '/images/no-cover.png'}" class="book-cover-img" alt="${book.title}">
                                         </a>
                                     </div>
@@ -461,43 +496,14 @@
                                     </div>
                                 </div>
                             </div>`;
-                        
+
                         $grid.append(bookCard);
-                        selectedBookId = book.bookId;
                     });
                 },
                 error: function (xhr) {
                     console.error("Failed to load collection details:", xhr.responseText);
                     $("#collectionName").text("Error Loading Collection");
                 }
-            });
-
-            $(document).on("click", "#bookDeleteBtn", function (event) {
-                event.preventDefault();
-
-                $.ajax({
-                    url: "/api/BookList/remove/" + bookListId,
-                    method: "DELETE",
-                    contentType: "application/json",
-                    headers: {
-                        Authorization: "Bearer " + sessionStorage.getItem("authToken")
-                    },
-                    data: JSON.stringify({
-                        bookId: selectedBookId,
-                    }),
-                    success: function () {
-                        $("#updateSuccess").removeClass("d-none").text(`Book deleted Successfully`);
-                        // setTimeout(function () {
-                            //window.location.reload();
-                        //}, 1000);
-                    },
-                    error: function () {
-                        $("#updateFail").removeClass("d-none").text("Error while deleting Book.");
-                        // setTimeout(function () {
-                          //  $("#updateFail").addClass("d-none").text("");
-                        //}, 3000)
-                    }
-                });
             });
         }
 

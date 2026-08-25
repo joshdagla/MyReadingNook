@@ -10,3 +10,8 @@ public class GetBookListDto
 
     public List<string> BookCovers { get; set; } = new List<string>();
 }
+
+public class RemoveBookDto
+{
+    public int BookId { get; set; }
+}
