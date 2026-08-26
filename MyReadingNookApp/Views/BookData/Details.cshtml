@@ -4,11 +4,185 @@
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-<div class="container mt-5" style="font-family: 'Calisto MT', sans-serif">
-    <div class="row">
-        <div class="col-xl-4 text-center">
-            <img id="bookCover" src="" alt="Book cover" class="img-fluid rounded shadow" style="max-height: 700px;">
-            <div id="hiddenGrp" class="rating-card p-4 d-none">
+
+<style>
+    body {
+        background-color: #faf6ee;
+    }
+
+    .shelf-heading {
+        font-family: 'Calisto MT', serif;
+        color: #4d4835;
+        font-weight: 700;
+    }
+
+    .nook-card {
+        background-color: #faf6ee;
+        border: 1px solid #c7b790;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(77, 72, 53, 0.08);
+    }
+
+    .book-cover-wrapper {
+        background-color: #e0d5b9;
+        border: 1px solid #c7b790;
+        border-radius: 8px;
+        padding: 12px;
+        display: inline-block;
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .book-cover-img {
+        width: 100%;
+        max-height: 420px;
+        object-fit: contain;
+        border-radius: 4px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .detail-label {
+        color: #8a8168;
+        font-family: 'Calisto MT', serif;
+        font-weight: bold;
+    }
+
+    .detail-value {
+        color: #4d4835;
+        font-family: 'Calisto MT', serif;
+    }
+
+    /* Star Rating Modern Theme */
+    .star-rating {
+        direction: rtl;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .star-rating input {
+        display: none;
+    }
+
+    .star-rating label {
+        color: #c7c3ba;
+        font-size: 26px;
+        padding: 0 3px;
+        cursor: pointer;
+        transition: transform 0.15s ease, color 0.15s ease;
+    }
+
+    .star-rating label:hover,
+    .star-rating label:hover~label,
+    .star-rating input:checked~label {
+        color: #dec676;
+    }
+
+    /* Status Buttons Theme */
+    .btn-nook-outline {
+        border: 1px solid #c7b790;
+        color: #4d4835;
+        background-color: #faf6ee;
+        font-family: 'Calisto MT', serif;
+        font-weight: 600;
+    }
+
+    .btn-nook-outline:hover, 
+    .btn-nook-outline.active {
+        background-color: #4d4835 !important;
+        color: #faf6ee !important;
+        border-color: #4d4835 !important;
+    }
+
+    /* Primary Action Buttons */
+    .btn-nook-primary {
+        background-color: #4d4835;
+        color: #faf6ee;
+        border: none;
+        font-family: 'Calisto MT', serif;
+        font-weight: 600;
+        padding: 10px 24px;
+        border-radius: 6px;
+        transition: background-color 0.2s;
+    }
+
+    .btn-nook-primary:hover {
+        background-color: #363325;
+        color: #fff;
+    }
+
+    .btn-nook-danger {
+        background-color: transparent;
+        border: 1px solid #c95c5c;
+        color: #c95c5c;
+        font-family: 'Calisto MT', serif;
+        font-weight: 600;
+    }
+
+    .btn-nook-danger:hover {
+        background-color: #c95c5c;
+        color: #fff;
+    }
+
+    /* Notes Card */
+    .notes-card {
+        background-color: #faf6ee;
+        border: 1px solid #c7b790;
+        border-radius: 10px;
+        padding: 1.5rem;
+        font-family: 'Calisto MT', serif;
+    }
+
+    .notes-text {
+        color: #4d4835;
+        white-space: pre-wrap;
+    }
+
+    .notes-timestamp {
+        color: #8a8168;
+        font-style: italic;
+        display: block;
+        margin-top: -0.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .notes-edit-btn {
+        background-color: transparent;
+        border: 1px solid #4d4835;
+        color: #4d4835;
+    }
+
+    .notes-edit-btn:hover {
+        background-color: #4d4835;
+        color: #faf6ee;
+    }
+
+    .notes-save-btn {
+        background-color: #4d4835;
+        color: #faf6ee;
+    }
+
+    .notes-save-btn:hover {
+        background-color: #363325;
+        color: #fff;
+    }
+
+    .notes-cancel-btn {
+        background-color: transparent;
+        border: 1px solid #c7b790;
+        color: #8a8168;
+    }
+</style>
+
+<div class="container my-5" style="font-family: 'Calisto MT', serif">
+    <div class="row g-4">
+        <!-- Left Column: Cover & Ratings -->
+        <div class="col-lg-4 text-center">
+            <div class="book-cover-wrapper mb-4">
+                <img id="bookCover" src="" alt="Book cover" class="book-cover-img">
+            </div>
+
+            <div id="hiddenGrp" class="nook-card d-none">
                 <div id="starRating" class="star-rating animated-stars">
                     <input type="radio" id="star5" name="rating" value="5">
                     <label for="star5" class="bi bi-star-fill"></label>
@@ -21,118 +195,67 @@
                     <input type="radio" id="star1" name="rating" value="1">
                     <label for="star1" class="bi bi-star-fill"></label>
                 </div>
-                <p class="text-muted mt-2">Click to rate</p>
+                <p class="small text-muted mt-1 mb-3">Click to rate this book</p>
                 
-                <button id="removeBtn" class="btn btn-danger mt-4">Remove Book</button>
+                <button id="removeBtn" class="btn btn-nook-danger btn-sm w-100">Remove from Collection</button>
             </div> 
         </div>
-        <div class="col-xl-8">
-            <h1 id="bookTitle" class="mb-2"></h1>
-            <h5 id="bookAuthor" class="text-muted mb-4"></h5>
 
-            <p><strong>Publisher:</strong> <span id="bookPublisher"></span></p>
-            <p><strong>ISBN:</strong> <span id="bookIsbn"></span></p>
+        <!-- Right Column: Info, Status & Notes -->
+        <div class="col-lg-8">
+            <div class="nook-card mb-4">
+                <h1 id="bookTitle" class="shelf-heading mb-1"></h1>
+                <h5 id="bookAuthor" class="shelf-book-author mb-4 fs-5"></h5>
 
-            <hr>
+                <div class="row mb-3">
+                    <div class="col-sm-6">
+                        <p class="mb-1"><span class="detail-label">Publisher:</span> <span id="bookPublisher" class="detail-value"></span></p>
+                    </div>
+                    <div class="col-sm-6">
+                        <p class="mb-1"><span class="detail-label">ISBN:</span> <span id="bookIsbn" class="detail-value"></span></p>
+                    </div>
+                </div>
 
-            <p><strong>Description:</strong> <span id="bookDescription"></span></p>
+                <hr style="border-color: #c7b790; opacity: 0.5;">
+
+                <p class="detail-label mb-1">Description:</p>
+                <p id="bookDescription" class="detail-value" style="line-height: 1.6;"></p>
+            </div>
+
+            <!-- Action Controls & Feedback -->
+            <div class="d-flex flex-column gap-3">
+                <button id="addToCollectionBtn" class="btn btn-nook-primary btn-lg align-self-start">Add to Collection</button>
+                
+                <div id="addSuccess" class="alert alert-success d-none mb-0" role="alert"></div>
+                <div id="status-feedback" class="alert alert-secondary d-none mb-0" role="alert"></div>
+                <div id="addError" class="alert alert-danger d-none mb-0" role="alert"></div>
+                
+                <div id="bookStatusBtnGrp" class="btn-group d-none w-100" role="group">
+                    <button id="wishToReadBtn" class="btn btn-nook-outline active">Wish to Read</button>
+                    <button id="currentlyReadingBtn" class="btn btn-nook-outline">Currently Reading</button>
+                    <button id="completedBtn" class="btn btn-nook-outline">Completed</button>
+                </div>
+                
+                <div id="notesCardSection" class="notes-card d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="shelf-heading mb-0">My Notes</h4>
+                        <button id="editNoteBtn" class="btn btn-sm notes-edit-btn">Edit</button>
+                    </div>
+
+                    <p id="noteText" class="notes-text">Click Edit to add your thoughts on this book...</p>
+                    <small id="noteTimestamp" class="notes-timestamp d-none"></small>
+
+                    <textarea id="noteTextarea" class="form-control d-none mb-2" rows="4" style="background-color: #faf6ee; border-color: #c7b790; font-family: 'Calisto MT', serif; color: #4d4835;"></textarea>
+
+                    <div class="d-flex gap-2">
+                        <button id="saveNoteBtn" class="btn notes-save-btn btn-sm d-none">Save</button>
+                        <button id="cancelNoteBtn" class="btn notes-cancel-btn btn-sm d-none">Cancel</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-<div class="d-flex align-items-center justify-content-center mt-4" style="font-family: 'Calisto MT', sans-serif">
-    <div class="row">
-        <button id="addToCollectionBtn" class="btn btn-success btn-lg">Add to Collection</button>
-        <div id="addSuccess" class="alert alert-primary d-none mt-2" role="alert"></div>
-        <div id="status-feedback" class="alert alert-secondary d-none mt-2" role="alert"></div>
-        <div id="addError" class="alert alert-danger d-none mt-2" role="alert"></div>
-        
-        <div id="bookStatusBtnGrp" class="btn-group d-none" role="group">
-            <button id="wishToReadBtn" class="btn status-btn btn-outline-success active">Wish to Read</button>
-            <button id="currentlyReadingBtn" class="btn status-btn btn-light text-dark border">Currently Reading</button>
-            <button id="completedBtn" class="btn status-btn btn-light text-dark border">Completed</button>
-        </div>
-        
-        <div id="notesCardSection" class="notes-card d-none">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h2 class="mb-0">My Notes</h2>
-                <button id="editNoteBtn" class="btn btn-sm notes-edit-btn">Edit</button>
-            </div>
-
-            <p id="noteText" class="notes-text">Click Edit to add your thoughts on this book...</p>
-            <small id="noteTimestamp" class="notes-timestamp d-none"></small>
-
-            <textarea id="noteTextarea" class="form-control d-none" rows="4"></textarea>
-
-            <div class="d-flex gap-2 mt-2">
-                <button id="saveNoteBtn" class="btn notes-save-btn d-none">Save</button>
-                <button id="cancelNoteBtn" class="btn notes-cancel-btn d-none">Cancel</button>
-            </div>
-        </div>
-        </div>
-</div>
-
-<style>
-    .star-rating {
-        direction: rtl;
-        display: inline-block;
-        cursor: pointer;
-    }
-
-    .star-rating input {
-        display: none;
-    }
-
-    .star-rating label {
-        color: #736f6f;
-        font-size: 24px;
-        padding: 0 2px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .star-rating label:hover,
-    .star-rating label:hover~label,
-    .star-rating input:checked~label {
-        color: #ffc107;
-    }
-
-    .notes-card {
-        background-color: #F1E9D2;
-        border-radius: 12px;
-        padding: 1.5rem;
-        font-family: 'Calisto MT', sans-serif;
-    }
-
-    .notes-text {
-        white-space: pre-wrap;
-    }
-
-    .notes-timestamp {
-        color: #8a8371;
-        font-style: italic;
-        display: block;
-        margin-top: -0.5rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .notes-edit-btn {
-        background-color: transparent;
-        border: 1px solid #625d47;
-        color: #625d47;
-    }
-
-    .notes-save-btn {
-        background-color: #625d47;
-        color: #fff;
-    }
-
-    .notes-cancel-btn {
-        background-color: transparent;
-        border: 1px solid #b8ae94;
-        color: #625d47;
-    }
-    
-</style>
 
 @section Scripts {
     <script>
@@ -222,16 +345,16 @@
                         bookId: currentBook.bookId,
                     }),
                     success: function () {
-                            $("#addToCollectionBtn").prop("disabled", false).removeClass("d-none");
-                            $("#hiddenGrp").addClass("d-none");
-                            $("#bookStatusBtnGrp").addClass("d-none");
-                            $("#notesCardSection").addClass("d-none"); 
+                        $("#addToCollectionBtn").prop("disabled", false).removeClass("d-none");
+                        $("#hiddenGrp").addClass("d-none");
+                        $("#bookStatusBtnGrp").addClass("d-none");
+                        $("#notesCardSection").addClass("d-none"); 
                     },
                     error: function (xhr) {
                         $("#addError").removeClass("d-none").text(xhr.responseJSON?.errorMessage ?? "Failed to remove book");
                     }
-                })
-            })
+                });
+            });
 
             document.querySelectorAll('.star-rating:not(.readonly) label').forEach(star => {
                 star.addEventListener('click', function() {
@@ -295,25 +418,20 @@
                     },
                     dataType: "json",
                     success: function (response) {
-                        // 1. Populate Star Rating
                         if (response.bookRating) {
                             $(`#starRating input[value="${response.bookRating}"]`).prop('checked', true);
                         }
 
-                        // 2. Populate Status Buttons
                         if (response.bookStatus) {
-                            $('#bookStatusBtnGrp .status-btn')
-                                .removeClass('btn-outline-success active')
-                                .addClass('btn-light text-dark border');
+                            $('#bookStatusBtnGrp .status-btn, #bookStatusBtnGrp .btn-nook-outline')
+                                .removeClass('active');
 
-                            $('#bookStatusBtnGrp .status-btn').filter(function () {
+                            $('#bookStatusBtnGrp button').filter(function () {
                                 return $(this).text().trim().toLowerCase() === response.bookStatus.toLowerCase();
-                            }).removeClass('btn-light text-dark').addClass('btn-outline-success active');
+                            }).addClass('active');
                         }
 
-                        // 3. Populate Note Text & Handle Placeholder State
                         if (response.userNote && response.userNote.trim() !== "") {
-                            // Set saved note content
                             $('#noteText').text(response.userNote);
                             $('#noteTextarea').val(response.userNote);
 
@@ -323,7 +441,6 @@
 
                             $('#noteTimestamp').text("Last edited: " + formattedDate).removeClass('d-none');
                         } else {
-                            // Display default placeholder text
                             $('#noteText').text("Click Edit to add your thoughts on this book...");
                             $('#noteTextarea').val("");
                             $('#noteTimestamp').addClass('d-none');
@@ -335,14 +452,13 @@
                 });
             }
 
-
             $('#starRating input[type="radio"]').on('change', function () {
                 let ratingValue = parseInt($(this).val(), 10);
                 sendPartialUpdate(getActiveBookId(), { BookRating: ratingValue });
             });
 
-            $('#bookStatusBtnGrp .status-btn').on('click', function () {
-                if ($(this).hasClass("btn-outline-success")) return;
+            $('#bookStatusBtnGrp button').on('click', function () {
+                if ($(this).hasClass("active")) return;
 
                 let clickedId = $(this).attr('id');
                 let statusText = '';
@@ -355,13 +471,8 @@
                     statusText = 'Completed';
                 }
 
-                $('#bookStatusBtnGrp .status-btn')
-                    .removeClass('btn-outline-success active')
-                    .addClass('btn-light text-dark border');
-
-                $(this)
-                    .removeClass('btn-light text-dark')
-                    .addClass('btn-outline-success active');
+                $('#bookStatusBtnGrp button').removeClass('active');
+                $(this).addClass('active');
 
                 sendPartialUpdate(getActiveBookId(), { BookStatus: statusText });
             });

@@ -69,7 +69,7 @@
                         if (book.bookStatus === 'Reading') statusBadgeColor = 'bg-primary';
 
                         var bookCard = `
-                                <div class="col" data-id="${book.bookId}">
+                                <div style="font-family: 'Calisto MT', sans-serif" class="col" data-id="${book.bookId}">
                                     <a href="/BookData/Details?bookId=${book.bookId}" class="text-decoration-none text-dark h-100 d-block">
                                         <div class="card h-100 card-hover">
                                             ${book.imagePath ? `
