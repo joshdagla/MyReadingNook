@@ -47,7 +47,7 @@ public class DailyShelfService
             try
             {
                 var booksRequest = _googleBooksClient.Volumes.List($"subject:\"{genre}\"");
-                booksRequest.MaxResults = 5;
+                booksRequest.MaxResults = 3;
 
                 var response = await booksRequest.ExecuteAsync();
                 return response.Items ?? new List<Volume>();

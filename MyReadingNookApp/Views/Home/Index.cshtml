@@ -3,56 +3,62 @@
 }
 
 <style>
+    .shelf-heading {
+        font-family: 'Calisto MT', serif;
+        color: #4d4835;
+        font-weight: 700;
+    }
+
     .books-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
         gap: 20px;
         margin-top: 20px;
     }
 
-    .book-card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
+    .shelf-book-card {
+        background-color: #faf6ee;
+        border: 1px solid #c7b790;
+        border-radius: 10px;
         padding: 12px;
         text-align: center;
-        background-color: #fff;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        transition: transform 0.18s ease-in-out, border-color 0.18s ease-in-out, box-shadow 0.18s ease-in-out;
     }
 
-    .book-card img {
+    .shelf-book-card:hover {
+        transform: translateY(-4px);
+        border-color: #b9a677;
+        box-shadow: 0 8px 18px rgba(77, 72, 53, 0.18);
+    }
+
+    .shelf-book-card img {
         max-width: 100%;
         height: 180px;
         object-fit: contain;
         margin-bottom: 10px;
-        background-color: #f9f9f9;
+        background-color: #e0d5b9;
         border-radius: 4px;
+        padding: 6px;
     }
 
-    .book-title {
-        font-weight: bold;
+    .shelf-book-title {
+        font-family: 'Calisto MT', serif;
+        font-weight: 700;
         font-size: 0.95rem;
+        color: #4d4835;
         margin-bottom: 4px;
-        color: #333;
     }
 
-    .book-author {
+    .shelf-book-author {
+        font-family: 'Calisto MT', serif;
         font-size: 0.85rem;
-        color: #666;
-        margin-bottom: 6px;
-    }
-
-    .book-isbn {
-        font-size: 0.75rem;
-        color: #888;
+        color: #8a8168;
     }
 </style>
 
-<h2>Daily Shelf</h2>
-
-<button id="loadShelfBtn" class="btn btn-primary">Fetch Today's Books</button>
+<h2 class="shelf-heading">Today's Shelf</h2>
 
 <div id="statusMessage" class="mt-3"></div>
 <div id="booksGrid" class="books-grid"></div>
@@ -60,38 +66,60 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            $('#loadShelfBtn').click(function () {
-                $('#statusMessage').html('<span class="text-info">Loading books...</span>');
+
+            function renderBooks(books) {
                 $('#booksGrid').empty();
 
+                $.each(books, function (index, book) {
+                    var fallbackImage = 'https://via.placeholder.com/160x180?text=No+Cover';
+                    var imageSrc = book.imagePath ? book.imagePath.replace('http://', 'https://') : fallbackImage;
+
+                    const isbn = book.isbn;
+
+                    var cardHtml = `
+                        <div class="shelf-book-card" data-book-isbn="${isbn}">
+                            <img src="${imageSrc}" alt="${book.title}" />
+                            <div class="shelf-book-title">${book.title}</div>
+                            <div class="shelf-book-author">${book.author}</div>
+                        </div>
+                    `;
+
+                    $('#booksGrid').append(cardHtml);
+                });
+            }
+
+            // Event handler outside renderBooks function
+            $(document).on('click', '.shelf-book-card', function (event) {
+                event.preventDefault();
+
+                const $div = $(this);
+                const bookIsbn = $div.attr("data-book-isbn");
+                
+                if (bookIsbn == null || bookIsbn === "") {
+                    console.error("No isbn available for this book. Please search for it manually.")
+                }
+
+                window.location.href = `/BookData/Details?isbn=${bookIsbn}`;
+            });
+
+            function fetchShelfFromServer() {
+                $('#statusMessage').html('<span class="text-info">Loading books...</span>');
+
                 $.ajax({
-                    url: '/api/Books/dailyShelf', // Adjust route to match your controller prefix (e.g., /api/books/dailyShelf)
+                    url: '/api/Books/dailyShelf',
                     type: 'GET',
-                    dataType: 'json',
                     headers: {
                         Authorization: 'Bearer ' + sessionStorage.getItem('authToken'),
                     },
                     success: function (data) {
                         $('#statusMessage').empty();
+                        renderBooks(data);
 
-                        $.each(data, function (index, book) {
-                            var fallbackImage = 'https://via.placeholder.com/128x180?text=No+Cover';
-                            var imageSrc = book.imagePath ? book.imagePath.replace('http://', 'https://') : fallbackImage;
-                            var isbnText = book.isbn ? 'ISBN: ' + book.isbn : 'No ISBN';
-
-                            var cardHtml = `
-                                <div class="book-card">
-                                    <img src="${imageSrc}" alt="${book.title}" />
-                                    <div>
-                                        <div class="book-title">${book.title}</div>
-                                        <div class="book-author">${book.author}</div>
-                                    </div>
-                                    <div class="book-isbn">${isbnText}</div>
-                                </div>
-                            `;
-
-                            $('#booksGrid').append(cardHtml);
-                        });
+                        const todayString = new Date().toISOString().split('T')[0]; // e.g. "2026-08-26"
+                        localStorage.setItem('dailyShelf', JSON.stringify({
+                            date: todayString,
+                            books: data
+                        }));
                     },
                     error: function (xhr) {
                         var errorMsg = 'An error occurred while fetching books.';
@@ -103,7 +131,27 @@
                         $('#statusMessage').html('<span class="text-danger">' + errorMsg + '</span>');
                     }
                 });
-            });
+            }
+
+
+            function loadShelf() {
+                const todayString = new Date().toISOString().split('T')[0];
+                const cachedRaw = localStorage.getItem('dailyShelf');
+
+                if (cachedRaw) {
+                    const cached = JSON.parse(cachedRaw);
+                    if (cached.date === todayString) {
+                        renderBooks(cached.books);
+                        return; 
+                    }
+                }
+
+                fetchShelfFromServer();
+            }
+
+            loadShelf();
+
         });
+        
     </script>
 }
