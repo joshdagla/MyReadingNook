@@ -19,6 +19,21 @@
     })
     
     $(document).ready(function () {
+        $.ajax({
+            url: "/api/User/username",
+            method: "GET",
+            contentType: "application/json",
+            headers: {
+                Authorization: "Bearer " + sessionStorage.getItem('authToken'),
+            },
+            success: function (response) {
+                $("#usernameDisplay").html(response);
+            },
+            error: function (xhr) {
+                $("#usernameDisplay").html("Not Found");
+            },
+        })
+        
     let searchTimeout;
 
     $("#searchInput").on("input", function () {
