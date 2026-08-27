@@ -218,18 +218,19 @@
     }
 
     .book-cover-wrap {
-        background-color: #e0d5b9;
-        padding: 14px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        padding: 20px;
     }
-    
+
     .book-cover-img {
-        height: 200px;
-        object-fit: contain;
-        box-shadow: 0 4px 10px rgba(77, 72, 53, 0.3);
-        border-radius: 2px;
+        height: 260px; /* up from whatever it currently is, e.g. 200px */
+    }
+
+    .library-card .card-body {
+        padding: 1.1rem 1.25rem;
+    }
+
+    .book-title {
+        font-size: 1.05rem;
     }
 
     .book-title {
@@ -476,25 +477,24 @@
                         const currentBookId = book.id || book.bookId;
 
                         const bookCard = `
-                            <div class="col">
-                                <div class="card h-100 library-card position-relative">
-                                    <!-- Use class instead of id, and store book ID in data-book-id -->
-                                    <button class="btn btn-light overlay-button shadow-sm book-delete-btn" type="button" data-book-id="${currentBookId}">
-                                        <i class="bi bi-x"></i>
-                                    </button>
-                            
-                                    <div class="book-cover-wrap">
-                                        <a href="/BookData/Details?bookId=${currentBookId}">
-                                            <img src="${book.imagePath || '/images/no-cover.png'}" class="book-cover-img" alt="${book.title}">
-                                        </a>
-                                    </div>
-                                    <div class="card-body">
-                                        <h6 class="book-title text-truncate">${book.title}</h6>
-                                        <div class="title-underline"></div>
-                                        <p class="book-author small text-truncate">${book.author}</p>
-                                    </div>
-                                </div>
-                            </div>`;
+                                            <div class="col">
+                                                <div class="card h-100 library-card position-relative">
+                                                    <button class="btn btn-light overlay-button shadow-sm book-delete-btn" type="button" data-book-id="${currentBookId}">
+                                                        <i class="bi bi-x"></i>
+                                                    </button>
+                                        
+                                                    <div class="book-cover-wrap">
+                                                        <a href="/BookData/Details?bookId=${currentBookId}">
+                                                            <img src="${book.imagePath || '/images/no-cover.png'}" class="book-cover-img" alt="${book.title}">
+                                                        </a>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <h6 class="book-title text-truncate">${book.title}</h6>
+                                                        <div class="title-underline"></div>
+                                                        <p class="book-author small text-truncate">${book.author}</p>
+                                                    </div>
+                                                </div>
+                                            </div>`;
 
                         $grid.append(bookCard);
                     });
