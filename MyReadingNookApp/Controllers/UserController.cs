@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyReadingNookApp.Dtos.UserBooks;
 using MyReadingNookApp.Extensions;
 using MyReadingNookApp.Models;
 
@@ -32,5 +33,23 @@ public class UserController : ControllerBase
         }
         
         return Ok(username);
+    }
+
+    [Authorize]
+    [HttpGet("bookStats")]
+    public async Task<IActionResult> GetUserBookStats()
+    {
+        int userId = User.GetUserId();
+
+        var response = _nookContext.Users
+            .Where(u => u.Id == userId)
+            .Select(u => new BookStatsResponseDto
+            {
+                TotalBooks = u.TotalBookCount,
+                CompletedBooks = u.CompletedBookCount,
+                PendingBooks = u.PendingBookCount,
+            });
+
+        return Ok(response);
     }
 }

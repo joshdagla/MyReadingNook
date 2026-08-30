@@ -6,6 +6,34 @@
     <div id="book-grid" class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3"></div>
 </div>
 
+@section CustomWidget
+{
+    <h4 class="fw-bold mb-4" style="color: #4d4835; letter-spacing: 0.3px;">Your Reading Stats</h4>
+
+    <div id="statsLoading" class="text-center py-5" style="color: #a89f89; font-size: 0.9rem;">
+        Loading stats...
+    </div>
+
+    <div id="statsContent" class="d-none">
+        <div class="stat-row">
+            <span class="stat-label">Total Books</span>
+            <span class="mx-3 stat-value" id="totalCount">0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Completed</span>
+            <span class="mx-3 stat-value" id="completedCount">0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Wish to Read</span>
+            <span class="mx-3 stat-value" id="pendingCount">0</span>
+        </div>
+    </div>
+
+    <div id="statsError" class="text-center py-5 d-none" style="color: #a89f89; font-size: 0.9rem;">
+        Couldn't load your stats right now.
+    </div>
+}
+
 <style>
     .card-hover {
         background-color: #faf6ee;
@@ -35,14 +63,29 @@
         color: #8a8168 !important;
     }
 
-    .badge-wish {
-        background-color: #c7b790;
-        color: #4d4835;
+    .stat-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 14px 0;
+        border-bottom: 1px solid #e5ddc8;
     }
 
-    .badge-completed {
-        background-color: #4d4835;
-        color: #faf6ee;
+    .stat-row:last-child {
+        border-bottom: none;
+    }
+
+    .stat-label {
+        font-family: 'Calisto MT', serif;
+        font-size: 0.95rem;
+        color: #6b6455;
+    }
+
+    .stat-value {
+        font-family: 'Calisto MT', serif;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #4d4835;
     }
 </style>
 
@@ -98,6 +141,31 @@
                     console.error("Failed to load books:", error);
                     $("#book-grid").html('<div class="col-12 text-center text-danger">Failed to load books. Please try again later.</div>');
                 }
+            });
+
+            $.ajax({
+                url: "/api/User/bookStats",
+                type: "GET",
+                dataType: "json",
+                headers: {
+                    authorization: "Bearer " + sessionStorage.getItem("authToken"),
+                },
+                success: function (data) {
+                    $("#statsLoading").addClass("d-none");
+                    $("#statsContent").removeClass("d-none");
+
+                    // Check if data array exists and has at least one item
+                    if (data && data.length > 0) {
+                        const stats = data[0]; // Access the first object inside the JSON array
+
+                        $("#totalCount").html(stats.totalBooks);
+                        $("#completedCount").html(stats.completedBooks);
+                        $("#pendingCount").html(stats.pendingBooks);
+                    }
+                },
+                error: function () {
+                    $("#statsError").removeClass("d-none");
+                },
             });
         });
     </script>

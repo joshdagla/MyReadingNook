@@ -13,7 +13,10 @@
         statusCode: {
             401: function ()
             {
-                window.location.href = "/Account/Login";
+                if (isLoginPage == false) 
+                {
+                    window.location.href = "/Account/Login";
+                }
             }
         }
     })

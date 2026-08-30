@@ -157,20 +157,20 @@ else
                                     </button>
                                 </div>
 
-                                @if (IsSectionDefined("CustomWidget"))
-                                {
-                                    @RenderSection("CustomWidget", required: false)
-                                }
-                                else
-                                {
-                                    <div class="nook-widget p-4 rounded-3 shadow-sm d-flex flex-column align-items-center justify-content-center text-center"
-                                         style="background-color: #faf6ee; border: 1px solid #c7b790; font-family: 'Calisto MT', serif; min-height: 250px;">
+                                <div class="nook-widget p-4 rounded-3 shadow-sm d-flex flex-column align-items-center justify-content-center text-center"
+                                     style="background-color: #faf6ee; border: 1px solid #c7b790; font-family: 'Calisto MT', serif; min-height: 250px;">
+                                    @if (IsSectionDefined("CustomWidget"))
+                                    {
+                                        @RenderSection("CustomWidget", required: false)
+                                    }
+                                    else
+                                    {
                                         <i class="fs-1 bi bi-share-fill mb-2" style="color: #b9a677;"></i>
-                                        <h4 class="fw-bold mb-2" style="color: #4d4835;">Generate Friend Link</h4>
-                                        <p class="mb-4" style="font-size: 0.95rem; color: #8a8168;">Let your friends know more about your book interests and custom collections.</p>
-                                        <button class="btn btn-lg w-100 fw-bold border-0" style="background-color: #4d4835; color: #faf6ee; font-size: 1rem;">Generate Link</button>
-                                    </div>
-                                }
+                                    <h4 class="fw-bold mb-2" style="color: #4d4835;">Generate Friend Link</h4>
+                                    <p class="mb-4" style="font-size: 0.95rem; color: #8a8168;">Let your friends know more about your book interests and custom collections.</p>
+                                    <button class="btn btn-lg w-100 fw-bold border-0" style="background-color: #4d4835; color: #faf6ee; font-size: 1rem;">Generate Link</button>
+                                    }
+                                </div>
                             </div>
 
                         </div>
