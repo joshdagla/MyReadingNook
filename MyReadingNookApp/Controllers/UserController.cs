@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MyReadingNookApp.Dtos.UserBooks;
 using MyReadingNookApp.Extensions;
 using MyReadingNookApp.Models;
@@ -50,6 +51,35 @@ public class UserController : ControllerBase
                 PendingBooks = u.PendingBookCount,
             });
 
+        return Ok(response);
+    }
+
+    [Authorize]
+    [HttpGet("collectionStats")]
+    public async Task<IActionResult> GetUserCollectionStats()
+    {
+        int userId = User.GetUserId();
+        
+        var collectionsList = await _nookContext.BookLists
+            .Where(bl => bl.UserModel.Id == userId)
+            .Select(bl => new CollectionItemDto
+            {
+                CollectionName = bl.ListName,
+                BookCount = bl.BookItems.Count()
+            })
+            .ToListAsync();
+
+        if (collectionsList == null)
+        {
+            return BadRequest("Error in retrieving collection stats");
+        }
+
+        var response = new CollectionStatsResponseDto
+        {
+            TotalCollections = collectionsList.Count,
+            Collections = collectionsList
+        };
+        
         return Ok(response);
     }
 }

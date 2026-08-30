@@ -32,6 +32,30 @@
     <div id="collectionsGrid" class="row g-4"></div>
 </div>
 
+@section CustomWidget
+{
+    <h4 class="fw-bold mb-1" style="color: #4d4835; letter-spacing: 0.3px;">Your Collections</h4>
+
+    <div id="collectionsSummaryHeading" class="mb-3 fs-6 d-none" style="color: #696666; font-size: 0.9rem;">
+        <span class="fw-bold fs-5" id="collectionsTotalCount" style="color: #a69361; font-size: 1.1rem;">0</span>
+        collections in your library
+    </div>
+
+    <div id="statsLoading" class="text-center py-5" style="color: #a89f89; font-size: 0.9rem;">
+        Loading collections...
+    </div>
+
+    <div id="collectionsList" class="d-none" style="max-height: 260px; overflow-y: auto;"></div>
+
+    <div id="statsEmpty" class="text-center py-5 d-none" style="color: #a89f89; font-size: 0.9rem;">
+        You haven't created any collections yet.
+    </div>
+
+    <div id="statsError" class="text-center py-5 d-none" style="color: #a89f89; font-size: 0.9rem;">
+        Couldn't load your collections right now.
+    </div>
+}
+
 <style>
     .create-collection-card {
         background-color: #faf6ee;
@@ -153,7 +177,47 @@
         background-color: #e0d5b9;
         padding: 1.1rem 1.75rem;
     }
+    
+    .collection-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 4px;
+        border-bottom: 1px solid #e5ddc8;
+    }
 
+    .collection-row:last-child {
+        border-bottom: none;
+    }
+
+    .collection-row-name {
+        font-family: 'Calisto MT', serif;
+        font-size: 0.95rem;
+        color: #4d4835;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 75%;
+    }
+
+    .collection-row-count {
+        font-family: 'Calisto MT', serif;
+        font-size: 0.85rem;
+        color: #6b6455;
+        background-color: #e5ddc8;
+        border-radius: 20px;
+        padding: 2px 10px;
+        flex-shrink: 0;
+    }
+
+    #collectionsList::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    #collectionsList::-webkit-scrollbar-thumb {
+        background-color: #d4c9a8;
+        border-radius: 10px;
+    }
 </style>
 
 @section Scripts
@@ -250,6 +314,43 @@
                     }
                 });
             });
-        })
+            
+            $.ajax({
+                url: "/api/User/collectionStats",
+                method: "GET",
+                headers: {
+                    Authorization: "Bearer " + sessionStorage.getItem("authToken")
+                },
+                success: function (response) {
+                    $("#statsLoading").addClass("d-none");
+
+                    if (!response.collections || response.collections.length === 0) {
+                        $("#statsEmpty").removeClass("d-none");
+                        return;
+                    }
+
+                    $("#collectionsTotalCount").text(response.totalCollections);
+                    $("#collectionsSummaryHeading").removeClass("d-none");
+
+                    const list = $("#collectionsList");
+                    response.collections.forEach(function (collection) {
+                        const bookCount = collection.bookCount || 0;
+                        const rowHtml = `
+                    <div class="collection-row">
+                        <span class="collection-row-name" title="${collection.collectionName}">${collection.collectionName}</span>
+                        <span class="collection-row-count mx-2">${bookCount} ${bookCount === 1 ? 'book' : 'books'}</span>
+                    </div>
+                `;
+                        list.append(rowHtml);
+                    });
+
+                    list.removeClass("d-none");
+                },
+                error: function (xhr) {
+                    $("#statsLoading").addClass("d-none");
+                    $("#statsError").removeClass("d-none");
+                }
+            }); 
+        });
     </script>
 }
