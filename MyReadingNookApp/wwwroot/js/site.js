@@ -35,7 +35,49 @@
             error: function (xhr) {
                 $("#usernameDisplay").html("Not Found");
             },
-        })
+        });
+
+        $.ajax({
+            url: "/api/User/current",
+            method: "GET",
+            headers: {
+                Authorization: "Bearer " + sessionStorage.getItem("authToken")
+            },
+            success: function (response) {
+                $("#currentReadingLoading").addClass("d-none");
+                $("#currentBooksBadge").text(response.currentBooksCount + (response.currentBooksCount === 1 ? " Active" : " Active"));
+
+                if (!response.books || response.books.length === 0) {
+                    $("#currentReadingEmpty").removeClass("d-none");
+                    return;
+                }
+
+                const inner = $("#carouselInner");
+                response.books.forEach(function (book, index) {
+                    const cover = book.imagePath || "https://via.placeholder.com/140x210?text=No+Cover";
+                    const activeClass = index === 0 ? "active" : "";
+
+                    const slideHtml = `
+                        <div class="carousel-item ${activeClass}">
+                            <a href="/BookData/Details?bookId=${book.bookId}" class="text-decoration-none">
+                                <div class="book-cover-frame mx-auto mb-3 shadow" style="width: 140px; height: 210px; background-color: #e0d5b9; border: 1px solid #c7b790; border-radius: 8px; padding: 6px;">
+                                    <img src="${cover}" alt="${book.title}" class="w-100 h-100 rounded" style="object-fit: cover;">
+                                </div>
+                            </a>
+                            <h4 class="fw-bold mb-1 text-truncate" style="color: #4d4835;">${book.title}</h5>
+                            <p class="fs-5 mb-0" style="color: #8a8168;">${book.author}</p>
+                        </div>
+                    `;
+                    inner.append(slideHtml);
+                });
+
+                $("#currentlyReadingCarousel").removeClass("d-none");
+            },
+            error: function (xhr) {
+                $("#currentReadingLoading").addClass("d-none");
+                $("#currentReadingEmpty").removeClass("d-none");
+            }
+        });
         
     let searchTimeout;
 

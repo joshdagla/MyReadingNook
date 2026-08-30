@@ -82,4 +82,30 @@ public class UserController : ControllerBase
         
         return Ok(response);
     }
+
+    [Authorize]
+    [HttpGet("current")]
+    public async Task<IActionResult> GetCurrentlyReadingBooks()
+    {
+        int userId = User.GetUserId();
+
+        var currentBookList = await _nookContext.UserBooks
+            .Where(ub => ub.UserId == userId && ub.BookStatus == "Currently Reading")
+            .Select(ub => new BookItemDto
+            {
+                BookId = ub.BookId,
+                Author = ub.BookModel.Author,
+                Title = ub.BookModel.Title,
+                ImagePath = ub.BookModel.ImagePath,
+            })
+            .ToListAsync();
+
+        var response = new CurrentBooksResponseDto
+        {
+            CurrentBooksCount = currentBookList.Count,
+            Books = currentBookList,
+        };
+        
+        return Ok(response);
+    }
 }

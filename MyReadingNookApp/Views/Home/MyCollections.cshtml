@@ -34,7 +34,7 @@
 
 @section CustomWidget
 {
-    <h4 class="fw-bold mb-1" style="color: #4d4835; letter-spacing: 0.3px;">Your Collections</h4>
+    <h4 class="fw-bold fs-4 mb-1" style="color: #4d4835; letter-spacing: 0.3px;">Your Collections</h4>
 
     <div id="collectionsSummaryHeading" class="mb-3 fs-6 d-none" style="color: #696666; font-size: 0.9rem;">
         <span class="fw-bold fs-5" id="collectionsTotalCount" style="color: #a69361; font-size: 1.1rem;">0</span>
@@ -47,11 +47,11 @@
 
     <div id="collectionsList" class="d-none" style="max-height: 260px; overflow-y: auto;"></div>
 
-    <div id="statsEmpty" class="text-center py-5 d-none" style="color: #a89f89; font-size: 0.9rem;">
+    <div id="statsEmpty" class="fs-5 text-center py-5 d-none" style="color: #a89f89; font-size: 0.9rem;">
         You haven't created any collections yet.
     </div>
 
-    <div id="statsError" class="text-center py-5 d-none" style="color: #a89f89; font-size: 0.9rem;">
+    <div id="statsError" class="fs-5 text-center alert alert-danger py-5 d-none" type="alert">
         Couldn't load your collections right now.
     </div>
 }
@@ -337,8 +337,8 @@
                         const bookCount = collection.bookCount || 0;
                         const rowHtml = `
                     <div class="collection-row">
-                        <span class="collection-row-name" title="${collection.collectionName}">${collection.collectionName}</span>
-                        <span class="collection-row-count mx-2">${bookCount} ${bookCount === 1 ? 'book' : 'books'}</span>
+                        <span class="collection-row-name fs-5" title="${collection.collectionName}">${collection.collectionName}</span>
+                        <span class="collection-row-count fs-5 fw-medium mx-2" style="background-color:#eadab4; border:1px solid #c7b790 ">${bookCount} ${bookCount === 1 ? 'book' : 'books'}</span>
                     </div>
                 `;
                         list.append(rowHtml);
