@@ -75,7 +75,7 @@ public class FriendController : ControllerBase
     }
 
     [Authorize]
-    [HttpPut("sentInvites")]
+    [HttpGet("sentInvites")]
     public async Task<IActionResult> GetAllSentInvites()
     {
         int requesterId = User.GetUserId();
@@ -93,7 +93,7 @@ public class FriendController : ControllerBase
     }
 
     [Authorize]
-    [HttpPut("receievedInvites")]
+    [HttpGet("receievedInvites")]
     public async Task<IActionResult> GetAllReceivedInvites()
     {
         int requesterId = User.GetUserId();
