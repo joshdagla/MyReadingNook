@@ -26,9 +26,11 @@ builder.Services.AddScoped<BookDetailService>();
 builder.Services.AddScoped<BookListService>();
 builder.Services.AddScoped<DailyShelfService>();
 builder.Services.AddScoped<UserSearchService>();
+builder.Services.AddScoped<FriendInviteService>();
 builder.Services.AddHostedService<UserStatisticsService>();
 
-builder.Services.AddAuthentication(options =>
+builder
+    .Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -44,7 +46,8 @@ builder.Services.AddAuthentication(options =>
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
+            ),
         };
     });
 
