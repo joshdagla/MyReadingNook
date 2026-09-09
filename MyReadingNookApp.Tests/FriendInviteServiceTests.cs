@@ -1,10 +1,14 @@
-﻿namespace MyReadingNookApp.Tests;
+﻿using MyReadingNookApp.Dtos;
+using MyReadingNookApp.Services;
+using Xunit;
 
-public class UnitTest1
+namespace MyReadingNookApp.Tests;
+
+public class FriendInviteServiceTests
 {
     [Fact]
-    public void Test1()
+    public async Task SendFriendInviteAsync_SelfRequest_ReturnsFailure()
     {
-
+        using var context = TestNookContextFactory.Create();
     }
 }
