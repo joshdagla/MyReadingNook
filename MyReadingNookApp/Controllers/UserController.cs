@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MyReadingNookApp.Dtos.Friends;
 using MyReadingNookApp.Dtos.UserBooks;
 using MyReadingNookApp.Extensions;
 using MyReadingNookApp.Models;
@@ -107,5 +108,28 @@ public class UserController : ControllerBase
         };
         
         return Ok(response);
+    }
+
+    // PUT endpoint to update profile visibility status of user
+    [Authorize]
+    [HttpPut("profile")]
+    public async Task<IActionResult> UpdateProfileStatus([FromBody] ProfileVisibilityDto dto)
+    {
+        int userId = User.GetUserId();
+
+        var currentUser = await _nookContext.Users
+            .Where(u => u.Id == userId)
+            .FirstOrDefaultAsync();
+
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        currentUser.ProfileVisibility = dto.ProfileStatus;
+
+        await _nookContext.SaveChangesAsync();
+        
+        return Ok($"{currentUser.Username}'s profile visibility has been updated to {dto.ProfileStatus}");
     }
 }
