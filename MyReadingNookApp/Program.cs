@@ -25,6 +25,7 @@ builder.Services.AddScoped<BookAddService>();
 builder.Services.AddScoped<BookDetailService>();
 builder.Services.AddScoped<BookListService>();
 builder.Services.AddScoped<DailyShelfService>();
+builder.Services.AddScoped<UserSearchService>();
 builder.Services.AddHostedService<UserStatisticsService>();
 
 builder.Services.AddAuthentication(options =>
