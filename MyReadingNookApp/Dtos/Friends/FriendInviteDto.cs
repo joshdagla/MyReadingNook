@@ -30,6 +30,6 @@ public class AllFriendInviteDto
 
     public string InviteStatus { get; set; } = string.Empty;
 
-    public DateTime SentAt { get; set; }
+    public DateTimeOffset SentAt { get; set; }
 }
 

@@ -76,7 +76,11 @@ public class FriendInviteService : IFriendInviteService
             return new ServiceResult<SendFriendInviteDto>
             {
                 Success = true,
-                Data = new SendFriendInviteDto { AddresseeId = newFriendInvite.AddresseeId },
+                Data = new SendFriendInviteDto
+                {
+                    AddresseeId = newFriendInvite.AddresseeId,
+                    Message = "Friend request sent successfully",
+                },
             };
         }
         else
@@ -231,14 +235,56 @@ public class FriendInviteService : IFriendInviteService
     }
 
     // Service to Fetch all friend requests sent by the user
-    public Task<ServiceResult<List<AllFriendInviteDto>>> GetSentInvitesAsync(int userId)
+    public async Task<ServiceResult<List<AllFriendInviteDto>>> GetSentInvitesAsync(int userId)
     {
-        throw new NotImplementedException();
+        var sentInviteList = await _nookContext
+            .Friends.Where(f => f.RequesterId == userId && f.AddresseeId != userId)
+            .Select(f => new AllFriendInviteDto
+            {
+                RequesterId = userId,
+                AddresseeId = f.AddresseeId,
+                InviteStatus = f.Status,
+                SentAt = f.CreatedAt,
+            })
+            .ToListAsync();
+
+        // No friend invites have been sent
+        if (sentInviteList.Count == 0)
+        {
+            return new ServiceResult<List<AllFriendInviteDto>> { Success = true };
+        }
+
+        return new ServiceResult<List<AllFriendInviteDto>>
+        {
+            Success = true,
+            Data = sentInviteList,
+        };
     }
 
     // Service to Fetch all friend requests sent to the user
-    public Task<ServiceResult<List<AllFriendInviteDto>>> GetReceivedInvitesAsync(int userId)
+    public async Task<ServiceResult<List<AllFriendInviteDto>>> GetReceivedInvitesAsync(int userId)
     {
-        throw new NotImplementedException();
+        var recievedInviteList = await _nookContext
+            .Friends.Where(f => f.AddresseeId == userId && f.RequesterId != userId)
+            .Select(f => new AllFriendInviteDto
+            {
+                RequesterId = userId,
+                AddresseeId = f.AddresseeId,
+                InviteStatus = f.Status,
+                SentAt = f.CreatedAt,
+            })
+            .ToListAsync();
+
+        // No friend invites have been sent
+        if (recievedInviteList.Count == 0)
+        {
+            return new ServiceResult<List<AllFriendInviteDto>> { Success = true };
+        }
+
+        return new ServiceResult<List<AllFriendInviteDto>>
+        {
+            Success = true,
+            Data = recievedInviteList,
+        };
     }
 }
