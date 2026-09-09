@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
 
 namespace MyReadingNookApp.Models
 {
@@ -13,11 +12,12 @@ namespace MyReadingNookApp.Models
         public string? UserNotes { get; set; }
 
         [AllowedValues("Wish to Read", "Currently Reading", "Completed", ErrorMessage = "Invalid Book Status")]
+        [MaxLength(60)]
         public string BookStatus { get; set; } = "Wish to Read";
 
         // Rating given out of 5 stars
         [AllowedValues(1, 2, 3, 4, 5, ErrorMessage = "Invalid Book Rating")]
-        public int? BookRating { get; set; } = null;
+        public int? BookRating { get; set; } 
 
         // Navigation properties
         public UserModel UserModel { get; set; } = null!;

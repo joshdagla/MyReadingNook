@@ -113,6 +113,37 @@ namespace MyReadingNookApp.Migrations
                     b.ToTable("Books");
                 });
 
+            modelBuilder.Entity("MyReadingNookApp.Models.FriendsModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AddresseeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("RequesterId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AddresseeId");
+
+                    b.HasIndex("RequesterId", "AddresseeId")
+                        .IsUnique();
+
+                    b.ToTable("Friends");
+                });
+
             modelBuilder.Entity("MyReadingNookApp.Models.UserBookModel", b =>
                 {
                     b.Property<int>("UserId")
@@ -129,7 +160,8 @@ namespace MyReadingNookApp.Migrations
 
                     b.Property<string>("BookStatus")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(60)
+                        .HasColumnType("varchar(60)");
 
                     b.Property<string>("UserNotes")
                         .HasMaxLength(1000)
@@ -166,6 +198,11 @@ namespace MyReadingNookApp.Migrations
 
                     b.Property<int>("PendingBookCount")
                         .HasColumnType("int");
+
+                    b.Property<string>("ProfileVisibility")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
 
                     b.Property<int>("TotalBookCount")
                         .HasColumnType("int");
@@ -206,6 +243,25 @@ namespace MyReadingNookApp.Migrations
                         .IsRequired();
 
                     b.Navigation("UserModel");
+                });
+
+            modelBuilder.Entity("MyReadingNookApp.Models.FriendsModel", b =>
+                {
+                    b.HasOne("MyReadingNookApp.Models.UserModel", "Addressee")
+                        .WithMany()
+                        .HasForeignKey("AddresseeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MyReadingNookApp.Models.UserModel", "Requester")
+                        .WithMany()
+                        .HasForeignKey("RequesterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Addressee");
+
+                    b.Navigation("Requester");
                 });
 
             modelBuilder.Entity("MyReadingNookApp.Models.UserBookModel", b =>

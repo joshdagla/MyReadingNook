@@ -2,7 +2,6 @@ using MyReadingNookApp.Dtos;
 
 namespace MyReadingNookApp.Services;
 
-// TODO: Move ServiceResult wrapper class to a separate directory, as it might be used in other places
 public class ServiceResult<T>
 {
    public bool Success { get; set; }

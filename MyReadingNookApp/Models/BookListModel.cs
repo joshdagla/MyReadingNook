@@ -14,12 +14,12 @@ public class BookListModel
 
     [Required]
     [MaxLength(100)]
-    public string ListName { get; set; }
+    public string ListName { get; set; }= string.Empty;
 
     public List<BookModel>? BookItems { get; set; } = new();
 
     [Column(TypeName = "TEXT")]
-    public string? Summary { get; set; }
+    public string? Summary { get; set; }= string.Empty;
 
     public DateOnly DateCreated { get; set; } = DateOnly.FromDateTime(DateTime.Now);
     

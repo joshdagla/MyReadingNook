@@ -12,14 +12,14 @@ public class UserModel
     public int Id { get; set; }
 
     [Required]
-    public string Username { get; set; }
+    public string Username { get; set; } = string.Empty;
 
     [Required]
     [EmailAddress]
-    public string Email { get; set; }
+    public string Email { get; set; } = string.Empty;
 
     [Required]
-    public string PasswordHash { get; set; }
+    public string PasswordHash { get; set; } = string.Empty;
     
     public int TotalBookCount { get; set; } = 0;
 
@@ -27,5 +27,9 @@ public class UserModel
 
     public int PendingBookCount { get; set; } = 0;
 
+    [AllowedValues("Public", "Private", "FriendsOnly")]
+    [MaxLength(30)]
+    public string ProfileVisibility { get; set; } = "Public";
+    
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }

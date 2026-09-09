@@ -14,26 +14,26 @@ public class BookModel
 
     [Required]
     [MaxLength(100)]
-    public string Title { get; set; }
+    public string Title { get; set; }= string.Empty;
 
     [Required]
     [MaxLength(75)]
-    public string Author { get; set; }
+    public string Author { get; set; }= string.Empty;
 
     [Required]
     [Unicode(false)]
     [MaxLength(13)]
-    public string Isbn { get; set; }
+    public string Isbn { get; set; } = string.Empty;
 
     [MaxLength(30)]
     public string? Publisher { get; set; }
 
     [Column(TypeName = "TEXT")]
-    public string? Description { get; set; }
+    public string? Description { get; set; }= string.Empty;
 
     [Unicode(false)] 
     [MaxLength(300)]
-    public string? ImagePath { get; set; }
+    public string? ImagePath { get; set; }= string.Empty;
 
     public List<BookListModel>? BookList { get; set; } = new();
 }
