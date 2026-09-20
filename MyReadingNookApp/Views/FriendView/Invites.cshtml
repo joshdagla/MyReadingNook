@@ -1,34 +1,112 @@
 @{
 }
 
-<div class="container my-4">
-  <h1>Invites Page</h1>
+<div class="mb-4">
+  <h4 class="fw-bold mb-3" style="color: #4d4835; font-family: 'Calisto MT', serif;">Find Friends</h4>
+  <div class="search-container" style="max-width: 500px; position: relative;">
+    <input type="text" id="friendSearchInput" class="form-control search-input" placeholder="Search by username...">
+    <i class="fas fa-search search-icon"></i>
+    <div id="friendSearchResults" class="search-dropdown"></div>
+  </div>
+</div>
+
+<div>
+  <h4 class="fw-bold mb-3" style="color: #4d4835; font-family: 'Calisto MT', serif;">My Friends</h4>
+  <div id="friendsLoading" class="text-center py-4" style="color: #a89f89;">Loading friends...</div>
+  <div id="friendsEmpty" class="text-center py-4 d-none" style="color: #a89f89;">You haven't added any friends yet.
+  </div>
+  <div id="friendsList" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3"></div>
 </div>
 
 @section CustomWidget
 {
-<h4 class="fw-bold mb-4" style="color: #4d4835; letter-spacing: 0.3px;">Your Reading Stats</h4>
+<div class="nook-widget p-4 rounded-3 shadow-sm"
+  style="background-color: #faf6ee; border: 1px solid #c7b790; font-family: 'Calisto MT', serif; min-height: 250px;">
 
-<div id="statsLoading" class="text-center fs-5 fw-semibold py-5" style="color: #a89f89; font-size: 0.9rem;">
-  Loading stats...
-</div>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold mb-0" style="color: #4d4835;">Friend Requests</h4>
+    <span id="requestsBadge" class="badge rounded-pill d-none"
+      style="background-color: #b9a677; color: #faf6ee; font-size: 0.8rem;">0</span>
+  </div>
 
-<div id="statsContent" class="d-none">
-  <div class="stat-row">
-    <span class="fw-medium fs-4 stat-label">Total Books</span>
-    <span class="mx-3 fs-4 stat-value" id="totalCount">0</span>
-  </div>
-  <div class="stat-row">
-    <span class="fw-medium fs-4 stat-label">Completed</span>
-    <span class="mx-3 fs-4 stat-value" id="completedCount">0</span>
-  </div>
-  <div class="stat-row">
-    <span class="fw-medium fs-4 stat-label">Wish to Read</span>
-    <span class="mx-3 fs-4 stat-value" id="pendingCount">0</span>
-  </div>
-</div>
+  <div id="requestsLoading" class="text-center py-4" style="color: #a89f89; font-size: 0.9rem;">Loading...</div>
+  <div id="requestsEmpty" class="text-center py-4 d-none" style="color: #a89f89; font-size: 0.9rem;">No pending
+    requests.</div>
+  <div id="requestsList" style="max-height: 320px; overflow-y: auto;"></div>
 
-<div id="statsError" class="text-center fs-5 fw-semibold py-5 d-none" style="color: #a89f89; font-size: 0.9rem;">
-  Couldn't load your stats right now.
 </div>
 }
+
+<style>
+  .friend-card {
+    background-color: #faf6ee;
+    border: 1px solid #c7b790;
+    border-radius: 10px;
+    padding: 16px 12px;
+    text-align: center;
+    transition: transform 0.15s ease-in-out, border-color 0.15s ease-in-out;
+  }
+
+  .friend-card:hover {
+    transform: translateY(-3px);
+    border-color: #b9a677;
+  }
+
+  .friend-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #e0d5b9;
+    color: #4d4835;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin: 0 auto 8px;
+  }
+
+  .friend-name {
+    font-family: 'Calisto MT', serif;
+    font-weight: 700;
+    color: #4d4835;
+    font-size: 0.95rem;
+  }
+
+  .request-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #e5ddc8;
+  }
+
+  .request-row:last-child {
+    border-bottom: none;
+  }
+
+  .request-name {
+    font-family: 'Calisto MT', serif;
+    color: #4d4835;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .request-actions button {
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    padding: 4px 10px;
+    margin-left: 4px;
+  }
+
+  .btn-accept {
+    background-color: #4d4835;
+    color: #faf6ee;
+  }
+
+  .btn-decline {
+    background-color: #e0d5b9;
+    color: #4d4835;
+  }
+</style>
