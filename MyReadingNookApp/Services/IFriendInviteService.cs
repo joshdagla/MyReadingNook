@@ -17,5 +17,7 @@ public interface IFriendInviteService
     Task<ServiceResult<List<AllFriendInviteDto>>> GetSentInvitesAsync(int userId);
 
     Task<ServiceResult<List<AllFriendInviteDto>>> GetReceivedInvitesAsync(int userId);
+    
+    Task<ServiceResult<List<GetMyFriendsResponseDto>>> GetMyFriendsAsync(int userId);
 }
 

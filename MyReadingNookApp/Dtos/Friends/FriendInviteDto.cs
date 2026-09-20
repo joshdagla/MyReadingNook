@@ -10,7 +10,7 @@ public class SendFriendInviteDto
 
 public class AcceptInviteDto
 {
-    public int AddresseeId { get; set; }
+    public int RequesterId { get; set; }
 
     public string InviteStatus { get; set; } = string.Empty;
 }
@@ -31,5 +31,14 @@ public class AllFriendInviteDto
     public string InviteStatus { get; set; } = string.Empty;
 
     public DateTimeOffset SentAt { get; set; }
+}
+
+public class GetMyFriendsResponseDto
+{
+    public int FriendId { get; set; }
+
+    public string Username { get; set; } = string.Empty;
+
+    public DateTimeOffset FriendsSince { get; set; }
 }
 

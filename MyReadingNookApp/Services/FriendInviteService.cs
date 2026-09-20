@@ -130,19 +130,17 @@ public class FriendInviteService : IFriendInviteService
 
     // Service to respond to a friend request
     public async Task<ServiceResult<FriendInviteResponseDto>> RespondToInviteAsync(
-        AcceptInviteDto dto,
-        int RequesterId
+    AcceptInviteDto dto,
+    int addresseeId  // this is the person responding — the one calling /reply
     )
     {
-        // User who sends the invite
-        bool requesterCheck = await _nookContext.Users.Where(u => u.Id == RequesterId).AnyAsync();
+        // The original sender of the invite
+        bool requesterCheck = await _nookContext.Users.Where(u => u.Id == dto.RequesterId).AnyAsync();
 
-        // User who recieves the request
-        bool addresseeCheck = await _nookContext
-            .Users.Where(u => u.Id == dto.AddresseeId)
-            .AnyAsync();
+        // The person responding (accepting/declining)
+        bool addresseeCheck = await _nookContext.Users.Where(u => u.Id == addresseeId).AnyAsync();
 
-        if (requesterCheck == false)
+        if (!requesterCheck)
         {
             return new ServiceResult<FriendInviteResponseDto>
             {
@@ -151,7 +149,7 @@ public class FriendInviteService : IFriendInviteService
             };
         }
 
-        if (addresseeCheck == false)
+        if (!addresseeCheck)
         {
             return new ServiceResult<FriendInviteResponseDto>
             {
@@ -160,9 +158,9 @@ public class FriendInviteService : IFriendInviteService
             };
         }
 
-        // Fetching the invite
+        // Fetching the invite — the row where dto.RequesterId sent to addresseeId (the current caller)
         var friendInvite = await _nookContext
-            .Friends.Where(f => f.RequesterId == RequesterId && f.AddresseeId == dto.AddresseeId)
+            .Friends.Where(f => f.RequesterId == dto.RequesterId && f.AddresseeId == addresseeId)
             .FirstOrDefaultAsync();
 
         if (friendInvite == null)
@@ -183,11 +181,9 @@ public class FriendInviteService : IFriendInviteService
             };
         }
 
-        // If an invite with the rejected status is found, automatically delete it.
         if (friendInvite.Status == "Rejected")
         {
             _nookContext.Friends.Remove(friendInvite);
-
             await _nookContext.SaveChangesAsync();
 
             return new ServiceResult<FriendInviteResponseDto> { Success = true };
@@ -195,11 +191,9 @@ public class FriendInviteService : IFriendInviteService
 
         if (friendInvite.Status == "Pending")
         {
-            // If user accepted the invite
             if (dto.InviteStatus == "Accepted")
             {
                 friendInvite.Status = dto.InviteStatus;
-
                 await _nookContext.SaveChangesAsync();
 
                 return new ServiceResult<FriendInviteResponseDto>
@@ -207,17 +201,14 @@ public class FriendInviteService : IFriendInviteService
                     Success = true,
                     Data = new FriendInviteResponseDto
                     {
-                        RequesterId = RequesterId,
+                        RequesterId = dto.RequesterId,
                         Message = "Friend request has been accepted",
                     },
                 };
             }
 
-            // if user rejected the invite
             friendInvite.Status = dto.InviteStatus;
-
             _nookContext.Friends.Remove(friendInvite);
-
             await _nookContext.SaveChangesAsync();
 
             return new ServiceResult<FriendInviteResponseDto>
@@ -268,8 +259,8 @@ public class FriendInviteService : IFriendInviteService
             .Friends.Where(f => f.AddresseeId == userId && f.RequesterId != userId)
             .Select(f => new AllFriendInviteDto
             {
-                RequesterId = userId,
-                AddresseeId = f.AddresseeId,
+                RequesterId = f.RequesterId,
+                AddresseeId = userId,
                 InviteStatus = f.Status,
                 SentAt = f.CreatedAt,
             })
@@ -285,6 +276,35 @@ public class FriendInviteService : IFriendInviteService
         {
             Success = true,
             Data = recievedInviteList,
+        };
+    }
+
+    public async Task<ServiceResult<List<GetMyFriendsResponseDto>>> GetMyFriendsAsync(int userId)
+    {
+        var friendRows = await _nookContext.Friends
+            .Where(f => f.Status == "Accepted" && (f.RequesterId == userId || f.AddresseeId == userId))
+            .Select(f => new GetMyFriendsResponseDto
+            {
+                FriendId = f.RequesterId == userId ? f.AddresseeId : f.RequesterId,
+                Username = f.RequesterId == userId
+                    ? f.Addressee.Username
+                    : f.Requester.Username,
+                FriendsSince = f.CreatedAt
+            })
+            .ToListAsync();
+
+        if (friendRows.Count == 0)
+        {
+            return new ServiceResult<List<GetMyFriendsResponseDto>>
+            {
+                Success = true,
+            };
+        }
+
+        return new ServiceResult<List<GetMyFriendsResponseDto>>
+        {
+            Success = true,
+            Data = friendRows
         };
     }
 }

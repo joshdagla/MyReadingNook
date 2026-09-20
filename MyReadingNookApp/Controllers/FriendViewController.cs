@@ -4,7 +4,7 @@ namespace MyReadingNookApp.Controllers;
 
 public class FriendViewController : Controller
 {
-    public IActionResult Requests()
+    public IActionResult Invites()
     {
         return View();
     }

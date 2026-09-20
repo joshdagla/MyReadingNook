@@ -14,10 +14,10 @@ public class UserSearchService : IUserSearchService
     }
     
     // Service to search from all users
-    public async Task<ServiceResult<List<UserSearchResponseDto>>> SearchUserAsync(SearchUsernameDto username, int userId)
+    public async Task<ServiceResult<List<UserSearchResponseDto>>> SearchUserAsync(string username, int userId)
     {
         var userList = await _nookContext.Users
-            .Where(u => u.Id != userId && u.Username.Contains(username.Username))
+            .Where(u => u.Id != userId && u.Username.Contains(username))
             .Select(u => new UserSearchResponseDto
             {
                 Id = u.Id,

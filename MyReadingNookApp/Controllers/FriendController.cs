@@ -25,11 +25,11 @@ public class FriendController : ControllerBase
 
     [Authorize]
     [HttpGet("userSearch")]
-    public async Task<IActionResult> SearchUser([FromBody] SearchUsernameDto dto)
+    public async Task<IActionResult> SearchUser([FromQuery] string username)
     {
         int userId = User.GetUserId();
 
-        var result = await _userSearchService.SearchUserAsync(dto, userId);
+        var result = await _userSearchService.SearchUserAsync(username, userId);
 
         if (result.Success)
         {
@@ -107,6 +107,17 @@ public class FriendController : ControllerBase
                 "An error has occured while sending friend request. " + result.ErrorMessage
             );
         }
+
+        return Ok(result.Data);
+    }
+
+    [Authorize]
+    [HttpGet("allFriends")]
+    public async Task<IActionResult> GetAllFriends()
+    {
+        int userId = User.GetUserId();
+
+        var result = await _friendInviteService.GetMyFriendsAsync(userId);
 
         return Ok(result.Data);
     }
