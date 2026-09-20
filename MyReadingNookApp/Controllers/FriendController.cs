@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MyReadingNookApp.Dtos.Friends;
 using MyReadingNookApp.Extensions;
 using MyReadingNookApp.Services;
@@ -110,4 +111,3 @@ public class FriendController : ControllerBase
         return Ok(result.Data);
     }
 }
-

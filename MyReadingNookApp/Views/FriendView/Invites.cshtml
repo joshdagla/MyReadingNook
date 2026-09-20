@@ -1,0 +1,34 @@
+@{
+}
+
+<div class="container my-4">
+  <h1>Invites Page</h1>
+</div>
+
+@section CustomWidget
+{
+<h4 class="fw-bold mb-4" style="color: #4d4835; letter-spacing: 0.3px;">Your Reading Stats</h4>
+
+<div id="statsLoading" class="text-center fs-5 fw-semibold py-5" style="color: #a89f89; font-size: 0.9rem;">
+  Loading stats...
+</div>
+
+<div id="statsContent" class="d-none">
+  <div class="stat-row">
+    <span class="fw-medium fs-4 stat-label">Total Books</span>
+    <span class="mx-3 fs-4 stat-value" id="totalCount">0</span>
+  </div>
+  <div class="stat-row">
+    <span class="fw-medium fs-4 stat-label">Completed</span>
+    <span class="mx-3 fs-4 stat-value" id="completedCount">0</span>
+  </div>
+  <div class="stat-row">
+    <span class="fw-medium fs-4 stat-label">Wish to Read</span>
+    <span class="mx-3 fs-4 stat-value" id="pendingCount">0</span>
+  </div>
+</div>
+
+<div id="statsError" class="text-center fs-5 fw-semibold py-5 d-none" style="color: #a89f89; font-size: 0.9rem;">
+  Couldn't load your stats right now.
+</div>
+}
