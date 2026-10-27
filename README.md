@@ -37,8 +37,6 @@ Built with **ASP.NET Core MVC**, **Entity Framework Core + MySQL**, **JWT authen
 - **Collections**: create named collections and view them as cards with cover strips
 - **Daily Shelf**: a rotating landing-page selection of books, chosen deterministically from the date and cached client-side in `localStorage` so it's fetched once per day
 - **Reading stats and Currently Reading widgets** in the sidebar
-- **Friends**: search users, send / accept / decline friend requests, view your friends list, with profile visibility (Public / Friends Only / Private) respected in search results
-- **Responsive layout**: sidebar navigation that adapts to phone, tablet and desktop
 
 ---
 
@@ -130,10 +128,8 @@ Then open the URL shown in the terminal and register an account.
 
 - Friend profile pages that honor profile visibility
 - Unfriend action and profile visibility settings page
-- Usernames instead of ids in friend request lists
-- Reading streak tracker
-- Reading progress updates
-
+- Improving UI
+  
 ---
 
 ## 📄 License
