@@ -9,22 +9,20 @@ Built with **ASP.NET Core MVC**, **Entity Framework Core + MySQL**, **JWT authen
 ## 📸 Screenshots
 
 ### Login / Register
-![Login](docs/screenshots/login.png)
+![Login](images/login.png)
 
 ### Home: Daily Shelf and Search
-![Home](docs/screenshots/home.png)
+![Home](images/search.png)
 
 ### Book Details
-![Book details](docs/screenshots/book-details.png)
+![Book details](images/details.png)
 
 ### My Books
-![My Books](docs/screenshots/my-books.png)
+![My Books](images/mybooks.png)
 
 ### My Collections
-![My Collections](docs/screenshots/collections.png)
+![My Collections](images/myCollections.png)
 
-### Friends
-![Friends](docs/screenshots/friends.png)
 
 ---
 
