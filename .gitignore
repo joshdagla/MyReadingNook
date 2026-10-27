@@ -1,5 +1,3 @@
-/MyReadingNookApp/bin/Debug/net10.0
-
 ## ======= Build Artifacts and Outputs =======
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -7,12 +5,17 @@
 [Rr]eleases/
 x64/
 x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
 [Bb]in/
 [Oo]bj/
 [Oo]ut/
 [Ll]og/
 [Ll]ogs/
 *.binlog
+artifacts/
 
 ## ======= IDE Settings and Tooling =======
 # Visual Studio
@@ -43,24 +46,32 @@ appsettings.Local.json
 ## ======= User-specific files =======
 *.rsuser
 *.userprefs
+~$*
+*~
 
 ## ======= Package Managers =======
 # NuGet Packages
 *.nuget.props
 *.nuget.targets
+*.nupkg
+*.snupkg
 project.lock.json
 project.fragment.lock.json
 /packages/
 
-# Frontend dependencies (if using ASP.NET Core with Angular/React/Blazor)
+# Frontend dependencies
 node_modules/
-/wwwroot/lib/
 
 ## ======= Testing Artifacts =======
 TestResults/
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
 *.mstest
 *.testsettings
-/MyReadingNookApp/obj/Debug/net10.0
-/MyReadingNookApp/obj
-/MyReadingNookApp/bin/Debug/net10.0
-/MyReadingNookApp/bin/Debug/net10.0
+*.VisualState.xml
+TestResult.xml
+nunit-*.xml
+CodeCoverage/
+
+## ======= Misc =======
+ScaffoldingReadMe.txt
