@@ -14,7 +14,7 @@ public class BookDetailService : IBookDetailService
         _nookContext = nookContext;
         _bookSearchService = bookSearchService;
     }
-    
+
     public async Task<BookDetailsResult<BookDetailsResponseDto>> GetBookDetailsAsync(string isbn, int userId)
     {
             bool userExists = await _nookContext.Users.AnyAsync(u => u.Id == userId);
@@ -32,10 +32,12 @@ public class BookDetailService : IBookDetailService
             // If book does not exist in database
             if (bookExists == null)
             {
-                var googleResults = await _bookSearchService.SearchBooksAsync(null, null, isbn, maxResults: 1);
+                var googleResults = await _bookSearchService.SearchBooksAsync(null, null, isbn, 5);
 
-                // If book with the designated Isbn is not found
-                if (!googleResults.Any())
+                var googleBook = googleResults.FirstOrDefault(b =>
+                    b.VolumeInfo.IndustryIdentifiers?.Any(i => i.Identifier == isbn) ?? false);
+
+                if (googleBook == null)
                 {
                     return new BookDetailsResult<BookDetailsResponseDto>
                     {
@@ -43,9 +45,7 @@ public class BookDetailService : IBookDetailService
                         ErrorMessage = "No books found",
                     };
                 }
-                
-                var googleBook =  googleResults.First();
-                
+
                 // Book found in books API
                 return new BookDetailsResult<BookDetailsResponseDto>
                 {
@@ -60,7 +60,7 @@ public class BookDetailService : IBookDetailService
                         Publisher = googleBook.VolumeInfo.Publisher,
                         Description = googleBook.VolumeInfo.Description,
                         Isbn = isbn, // you already have it — it's the parameter you searched with
-                        Thumbnail = googleBook.VolumeInfo.ImageLinks?.Thumbnail                        
+                        Thumbnail = googleBook.VolumeInfo.ImageLinks?.Thumbnail
                     }
                 };
             }
@@ -87,7 +87,7 @@ public class BookDetailService : IBookDetailService
                     }
                 };
             }
-            
+
             // If user has it added in their collection
             return new BookDetailsResult<BookDetailsResponseDto>
             {
@@ -135,10 +135,10 @@ public class BookDetailService : IBookDetailService
                 ErrorMessage = "No book found in database",
             };
         }
-        
+
         var userBookExists = await _nookContext.UserBooks
             .FirstOrDefaultAsync(ub => ub.BookId == bookExists.Id && ub.UserId == userId);
-        
+
         // If book is in database but current user does not have it in their collection
         if (userBookExists == null)
         {
@@ -158,7 +158,7 @@ public class BookDetailService : IBookDetailService
                 }
             };
         }
-            
+
         // If user has it added in their collection
         return new BookDetailsResult<BookDetailsResponseDto>
         {

@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
-using MyReadingNookApp.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyReadingNookApp.Dtos.Books;
 using MyReadingNookApp.Extensions;
 using MyReadingNookApp.Models;
+using MyReadingNookApp.Services;
 
 namespace MyReadingNookApp.Controllers;
 
@@ -18,7 +18,13 @@ public class BooksController : ControllerBase
     private readonly BookDetailService _bookDetailService;
     private readonly DailyShelfService _dailyShelfService;
 
-    public BooksController(NookContext nookContext,BookSearchService bookService, BookAddService bookAddService, BookDetailService bookDetailService, DailyShelfService dailyShelfService)
+    public BooksController(
+        NookContext nookContext,
+        BookSearchService bookService,
+        BookAddService bookAddService,
+        BookDetailService bookDetailService,
+        DailyShelfService dailyShelfService
+    )
     {
         _nookContext = nookContext;
         _bookService = bookService;
@@ -26,27 +32,35 @@ public class BooksController : ControllerBase
         _bookDetailService = bookDetailService;
         _dailyShelfService = dailyShelfService;
     }
-    
+
     // Controller to search and query books from Google books api
     [Authorize]
     [HttpGet("search")] // Route resolves to: api/books/search
     public async Task<IActionResult> SearchBooks(
-        [FromQuery] string? title, 
-        [FromQuery] string? author, 
-        [FromQuery] string? isbn, 
-        [FromQuery] int maxResults = 10)
+        [FromQuery] string? title,
+        [FromQuery] string? author,
+        [FromQuery] string? isbn,
+        [FromQuery] int maxResults = 10
+    )
     {
         // Validation: Makes sure at least one search criterion is provided
-        if (string.IsNullOrWhiteSpace(title) && 
-            string.IsNullOrWhiteSpace(author) && 
-            string.IsNullOrWhiteSpace(isbn))
+        if (
+            string.IsNullOrWhiteSpace(title)
+            && string.IsNullOrWhiteSpace(author)
+            && string.IsNullOrWhiteSpace(isbn)
+        )
         {
-            return BadRequest(new { message = "You must provide at least one search parameter (title, author, or isbn)." });
+            return BadRequest(
+                new
+                {
+                    message = "You must provide at least one search parameter (title, author, or isbn).",
+                }
+            );
         }
 
         try
         {
-            int  userId = User.GetUserId();
+            int userId = User.GetUserId();
             var books = await _bookService.SearchBooksAsync(title, author, isbn, maxResults);
 
             if (!books.Any())
@@ -55,27 +69,37 @@ public class BooksController : ControllerBase
             }
 
             var formattedResponse = books
-                .Where(b => b.VolumeInfo.IndustryIdentifiers?.Any(i => i.Type is "ISBN_13" or "ISBN_10") ?? false)
+                .Where(b =>
+                    b.VolumeInfo.IndustryIdentifiers?.Any(i => i.Type is "ISBN_13" or "ISBN_10")
+                    ?? false
+                )
                 .Select(b => new
-            {
-                Id = b.Id,
-                Title = b.VolumeInfo.Title,
-                Author = b.VolumeInfo.Authors != null
-                ? string.Join(", ", b.VolumeInfo.Authors)
-                : "Unknown Author(s)",
-                Publisher = b.VolumeInfo.Publisher,
-                Description = b.VolumeInfo.Description,
-                Isbn = b.VolumeInfo.IndustryIdentifiers?.FirstOrDefault(i => i.Type == "ISBN_13")?.Identifier
-                       ?? b.VolumeInfo.IndustryIdentifiers?.FirstOrDefault(i => i.Type == "ISBN_10")?.Identifier
-                       ?? "",
-                Thumbnail = b.VolumeInfo.ImageLinks?.Thumbnail,
-            });
+                {
+                    Id = b.Id,
+                    Title = b.VolumeInfo.Title,
+                    Author = b.VolumeInfo.Authors != null
+                        ? string.Join(", ", b.VolumeInfo.Authors)
+                        : "Unknown Author(s)",
+                    Publisher = b.VolumeInfo.Publisher,
+                    Description = b.VolumeInfo.Description,
+                    Isbn = b.VolumeInfo.IndustryIdentifiers?.FirstOrDefault(i =>
+                        i.Type == "ISBN_13"
+                    )?.Identifier
+                        ?? b.VolumeInfo.IndustryIdentifiers?.FirstOrDefault(i =>
+                            i.Type == "ISBN_10"
+                        )?.Identifier
+                        ?? "",
+                    Thumbnail = b.VolumeInfo.ImageLinks?.Thumbnail,
+                });
 
             return Ok(formattedResponse);
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Google Books API Error", details = ex.Message });
+            return StatusCode(
+                500,
+                new { message = "Google Books API Error", details = ex.Message }
+            );
         }
     }
 
@@ -89,22 +113,30 @@ public class BooksController : ControllerBase
 
             if (!shelfBooks.Any())
             {
-                return BadRequest(new { message = "No books found currently for daily shelf" });
+                return BadRequest(
+                    new
+                    {
+                        message = "No books found currently for daily shelf" + ". Error occured.",
+                    }
+                );
             }
 
-            var formattedResponse = shelfBooks
-                .Select(b => new
-                {
-                    Title = b.VolumeInfo.Title,
-                    Author = b.VolumeInfo.Authors != null
-                        ? string.Join(", ", b.VolumeInfo.Authors)
-                        : "Unknown Author(s)",
-                    Isbn = b.VolumeInfo.IndustryIdentifiers?.FirstOrDefault(i => i.Type == "ISBN_13")?.Identifier
-                           ?? b.VolumeInfo.IndustryIdentifiers?.FirstOrDefault(i => i.Type == "ISBN_10")?.Identifier
-                           ?? "",
-                    ImagePath = b.VolumeInfo.ImageLinks?.Thumbnail,
-                });
-            
+            var formattedResponse = shelfBooks.Select(b => new
+            {
+                Title = b.VolumeInfo.Title,
+                Author = b.VolumeInfo.Authors != null
+                    ? string.Join(", ", b.VolumeInfo.Authors)
+                    : "Unknown Author(s)",
+                Isbn = b.VolumeInfo.IndustryIdentifiers?.FirstOrDefault(i =>
+                    i.Type == "ISBN_13"
+                )?.Identifier
+                    ?? b.VolumeInfo.IndustryIdentifiers?.FirstOrDefault(i =>
+                        i.Type == "ISBN_10"
+                    )?.Identifier
+                    ?? "",
+                ImagePath = b.VolumeInfo.ImageLinks?.Thumbnail,
+            });
+
             return Ok(formattedResponse);
         }
         catch (Exception e)
@@ -121,16 +153,15 @@ public class BooksController : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            
+
             var result = await _bookAddService.BookAddAsync(bookAddDto, userId);
 
             if (!result.Success)
             {
                 return BadRequest(result.ErrorMessage);
             }
-            
-            return Ok(result);
 
+            return Ok(result);
         }
         catch (Exception e)
         {
@@ -179,7 +210,7 @@ public class BooksController : ControllerBase
             {
                 return BadRequest(result.ErrorMessage);
             }
-            
+
             return Ok(result.Data);
         }
         catch (Exception e)

@@ -10,7 +10,7 @@ public class BookSearchService
     public BookSearchService(IConfiguration configuration)
     {
         var apiKey = configuration["GoogleBooks:ApiKey"];
-        
+
         _googleBooksClient = new Google.Apis.Books.v1.BooksService(new BaseClientService.Initializer()
         {
             ApiKey = apiKey,
@@ -22,15 +22,15 @@ public class BookSearchService
     {
         var queryParts = new List<string>();
 
-        // Appending Google query prefixes based on user inputs
+        // Plain keywords: fielded prefixes (intitle:, inauthor:, isbn:) returned no results
         if (!string.IsNullOrWhiteSpace(title))
-            queryParts.Add($"intitle:{title}");
+            queryParts.Add(title.Trim());
 
         if (!string.IsNullOrWhiteSpace(author))
-            queryParts.Add($"inauthor:{author}");
+            queryParts.Add(author.Trim());
 
         if (!string.IsNullOrWhiteSpace(isbn))
-            queryParts.Add($"isbn:{isbn}");
+            queryParts.Add(isbn.Trim());
 
         string finalQuery = string.Join(" ", queryParts);
 
@@ -40,6 +40,7 @@ public class BookSearchService
         }
 
         var listRequest = _googleBooksClient.Volumes.List(finalQuery);
+        listRequest.OrderBy = Google.Apis.Books.v1.VolumesResource.ListRequest.OrderByEnum.Relevance;
         listRequest.MaxResults = maxResults;
 
         var result = await listRequest.ExecuteAsync();

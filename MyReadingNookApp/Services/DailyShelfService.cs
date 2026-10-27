@@ -4,26 +4,38 @@ using Google.Apis.Services;
 
 namespace MyReadingNookApp.Services;
 
-public class DailyShelfService 
+public class DailyShelfService
 {
     private readonly BooksService _googleBooksClient;
+    private readonly ILogger<DailyShelfService> _logger;
 
-    public DailyShelfService(IConfiguration configuration)
+    public DailyShelfService(IConfiguration configuration, ILogger<DailyShelfService> logger)
     {
         var apiKey = configuration["GoogleBooks:ApiKey"];
-        
-        _googleBooksClient = new BooksService(new BaseClientService.Initializer()
-        {
-            ApiKey = apiKey,
-            ApplicationName = "MyReadingNookApp"
-        });
+        Console.WriteLine($"Key loaded: {!string.IsNullOrEmpty(apiKey)}");
+
+        _googleBooksClient = new BooksService(
+            new BaseClientService.Initializer()
+            {
+                ApiKey = apiKey,
+                ApplicationName = "MyReadingNookApp",
+            }
+        );
+
+        _logger = logger;
     }
-    
+
     // Hard-coded list of subjects to query from
     private static readonly string[] ShelfSubjects =
     {
-        "fantasy", "classics", "philosophy",
-        "mystery", "biography", "horror", "romance", "nonfiction"
+        "fantasy",
+        "classics",
+        "philosophy",
+        "mystery",
+        "biography",
+        "horror",
+        "romance",
+        "nonfiction",
     };
 
     private static List<string> GetTodaysSubjects(int count = 5)
@@ -31,11 +43,8 @@ public class DailyShelfService
         // DateTime.UtcNow.Date.GetHashCode() changes daily
         int seed = DateTime.UtcNow.Date.GetHashCode();
         var random = new Random(seed);
-        
-        return ShelfSubjects
-            .OrderBy(_ => random.Next())
-            .Take(count)
-            .ToList();
+
+        return ShelfSubjects.OrderBy(_ => random.Next()).Take(count).ToList();
     }
 
     public async Task<IList<Volume>> GetTodayShelfAsync()
@@ -44,18 +53,12 @@ public class DailyShelfService
 
         var tasks = subjects.Select(async genre =>
         {
-            try
-            {
-                var booksRequest = _googleBooksClient.Volumes.List($"subject:\"{genre}\"");
-                booksRequest.MaxResults = 3;
+            var booksRequest = _googleBooksClient.Volumes.List(genre);
+            booksRequest.OrderBy = VolumesResource.ListRequest.OrderByEnum.Relevance;
+            booksRequest.MaxResults = 3;
 
-                var response = await booksRequest.ExecuteAsync();
-                return response.Items ?? new List<Volume>();
-            }
-            catch
-            {
-                return new List<Volume>() as IList<Volume>;
-            }
+            var response = await booksRequest.ExecuteAsync();
+            return response.Items ?? new List<Volume>();
         });
 
         var results = await Task.WhenAll(tasks);
